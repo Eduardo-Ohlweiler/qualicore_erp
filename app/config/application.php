@@ -4,7 +4,7 @@ return [
         'timezone' => 'America/Sao_Paulo',
         'language' => 'pt',
         'application' => 'template',
-        'title' => 'Adianti Template 8.1',
+        'title' => 'AvaliaFit',
         'theme' => 'adminbs5',
         'seed' => 'odfu6asnodf8as',
         'rest_key' => '',
@@ -21,7 +21,7 @@ return [
           'en' => 'English',
           'es' => 'Español',
         ],
-        'multi_database' => '0',
+        'multi_database' => '1',
         'validate_strong_pass' => '1',
         'notification_login' => '0',
         'welcome_message' => 'Have a great jorney!',
@@ -30,6 +30,7 @@ return [
         'request_log_types' => 'cli,web,rest',
         /*'password_renewal_interval' => '',*/
     ],
+    
     'recaptcha' => [
         'enabled' => '0',
         'key' => '...',

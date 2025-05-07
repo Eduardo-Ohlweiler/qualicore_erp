@@ -1,4 +1,7 @@
 <?php
+
+use Adianti\Core\AdiantiApplicationConfig;
+
 if (version_compare(PHP_VERSION, '8.2.0') == -1)
 {
     die ('The minimum version required for PHP is 8.2.0');

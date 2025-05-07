@@ -7,126 +7,118 @@ use Adianti\Database\TFilter;
 use Adianti\Database\TRepository;
 use Adianti\Database\TTransaction;
 use Adianti\Registry\TSession;
+use Adianti\Widget\Container\TPanelGroup;
 use Adianti\Widget\Container\TVBox;
 use Adianti\Widget\Datagrid\TDataGrid;
 use Adianti\Widget\Datagrid\TDataGridAction;
 use Adianti\Widget\Datagrid\TDataGridColumn;
 use Adianti\Widget\Datagrid\TPageNavigation;
-use Adianti\Widget\Dialog\TMessage;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TLabel;
+use Adianti\Widget\Util\TXMLBreadCrumb;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
 class PessoaList extends TPage
 {
-    private $form; // formulário de filtro
-    private $datagrid; // listagem
+    private $form;
+    private $datagrid;
     private $pageNavigation;
 
     public function __construct()
     {
         parent::__construct();
 
-        // Criação do formulário
-        $this->form = new BootstrapFormBuilder('form_search_cliente');
-        $this->form->setFormTitle('Clientes');
+        $this->form = new BootstrapFormBuilder('form_search_Pessoa');
+        $this->form->setFormTitle('Pesquisar Pessoas');
 
         $nome = new TEntry('nome');
-        $email = new TEntry('email');
-
         $this->form->addFields([new TLabel('Nome:')], [$nome]);
-        $this->form->addFields([new TLabel('Email:')], [$email]);
 
-        $this->form->addAction('Buscar', new TAction([$this, 'onSearch']), 'fa:search');
+        $this->form->addAction('Pesquisar', new TAction([$this, 'onSearch']), 'fa:search blue');
 
-        // Criação do Datagrid
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
-        $this->datagrid->setHeight(320);
+        $this->datagrid->style = 'width: 100%';
 
-        $this->datagrid->addColumn(new TDataGridColumn('id', 'ID', 'right', '50px'));
-        $this->datagrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left'));
-        $this->datagrid->addColumn(new TDataGridColumn('email', 'Email', 'left'));
+        $col_id = new TDataGridColumn('id', 'ID', 'center', '10%');
+        $col_nome = new TDataGridColumn('nome', 'Nome', 'left', '40%');
+        $col_data_nascimento = new TDataGridColumn('data_nascimento', 'Data Nascimento', 'center', '20%');
+        $col_tipo_pessoa = new TDataGridColumn('tipo_pessoa->nome', 'Tipo Pessoa', 'left', '30%');
+        $col_telefone = new TDataGridColumn('telefone', 'Telefone', 'left', '30%');
 
-        $action = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);
-        $this->datagrid->addAction($action, 'Editar', 'fa:edit blue');
+        $this->datagrid->addColumn($col_id);
+        $this->datagrid->addColumn($col_nome);
+        $this->datagrid->addColumn($col_data_nascimento);
+        $this->datagrid->addColumn($col_tipo_pessoa);
 
-        // Criação da navegação
+        $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);
+        $this->datagrid->addAction($action_edit, 'Editar', 'fa:edit blue');
+
+        $this->datagrid->createModel();
+
         $this->pageNavigation = new TPageNavigation;
-        $this->pageNavigation->enableCounters();
         $this->pageNavigation->setAction(new TAction([$this, 'onReload']));
         $this->pageNavigation->setWidth($this->datagrid->getWidth());
 
-        // Container
-        $container = new TVBox;
-        $container->style = 'width: 100%';
-        $container->add($this->form);
-        $container->add($this->datagrid);
-        $container->add($this->pageNavigation);
+        $vbox = new TVBox;
+        $vbox->style = 'width: 100%';
+        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+        $vbox->add($this->form);
+        $vbox->add(TPanelGroup::pack('', $this->datagrid, $this->pageNavigation));
 
-        parent::add($container);
+        parent::add($vbox);
     }
 
     public function onSearch()
     {
         $data = $this->form->getData();
-        TSession::setValue('ClienteList_filter_nome', $data->nome);
-        TSession::setValue('ClienteList_filter_email', $data->email);
-        $this->form->setData($data);
+        $criteria = new TCriteria;
+
+        if (!empty($data->nome)) {
+            $criteria->add(new TFilter('nome', 'LIKE', "%{$data->nome}%"));
+        }
+
+        TSession::setValue('PessoaList_filter', $criteria);
         $this->onReload();
     }
 
-    public function onReload($param = null)
+    public function onReload()
     {
-        try {
-            TTransaction::open('avaliafit');
+        TTransaction::open('avaliafit');
 
-            $repository = new TRepository('Pessoa');
-            $limit = 10;
-            $criteria = new TCriteria;
-            $criteria->setProperties($param);
-            $criteria->setProperty('limit', $limit);
+        $criteria = new TCriteria;
+        $repository = new TRepository('Pessoa');
+        $limit = 10;
+        $param['offset'] = (TSession::getValue('page') - 1) * $limit;
+        $param['limit'] = $limit;
 
-            $nome = TSession::getValue('ClienteList_filter_nome');
-            $email = TSession::getValue('ClienteList_filter_email');
+        $objects = $repository->load($criteria, $param);
+        $this->datagrid->clear();
 
-            if ($nome) {
-                $criteria->add(new TFilter('nome', 'like', "%{$nome}%"));
+        if ($objects) {
+            foreach ($objects as $object) {
+                $this->datagrid->addItem($object);
             }
-            if ($email) {
-                $criteria->add(new TFilter('email', 'like', "%{$email}%"));
-            }
-
-            $objects = $repository->load($criteria, FALSE);
-
-            $this->datagrid->clear();
-            if ($objects) {
-                foreach ($objects as $object) {
-                    $this->datagrid->addItem($object);
-                }
-            }
-
-            $criteria->resetProperties();
-            $count = $repository->count($criteria);
-            $this->pageNavigation->setCount($count);
-            $this->pageNavigation->setProperties($param);
-            $this->pageNavigation->setLimit($limit);
-
-            TTransaction::close();
-        } catch (Exception $e) {
-            new TMessage('error', $e->getMessage());
         }
+
+        $this->pageNavigation->setCount($repository->count($criteria));
+        $this->pageNavigation->setProperties(['page' => TSession::getValue('page') ?? 1, 'limit' => $limit]);
+
+        TTransaction::close();
     }
 
     public function onEdit($param)
     {
-        new TMessage('info', 'Você clicou para editar o ID: ' . $param['id']);
+        $key = $param['id'];
+        //TApplication::loadPage('PessoaForm', 'onEdit', ['key' => $key]);
     }
 
     public function show()
     {
-        $this->onReload();
+        if (!$this->loaded) {
+            $this->onReload();
+        }
         parent::show();
     }
-
 }
+?>
