@@ -11,8 +11,11 @@ use Adianti\Widget\Container\TPanelGroup;
 use Adianti\Widget\Container\TVBox;
 use Adianti\Widget\Datagrid\TDataGrid;
 use Adianti\Widget\Datagrid\TDataGridAction;
+use Adianti\Widget\Datagrid\TDataGridActionGroup;
 use Adianti\Widget\Datagrid\TDataGridColumn;
 use Adianti\Widget\Datagrid\TPageNavigation;
+use Adianti\Widget\Dialog\TMessage;
+use Adianti\Widget\Dialog\TQuestion;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Util\TXMLBreadCrumb;
@@ -30,29 +33,65 @@ class PessoaList extends TPage
         parent::__construct();
 
         $this->form = new BootstrapFormBuilder('form_search_Pessoa');
-        $this->form->setFormTitle('Pesquisar Pessoas');
+        $this->form->setFormTitle('Pessoas');
 
-        $nome = new TEntry('nome');
-        $this->form->addFields([new TLabel('Nome:')], [$nome]);
+        $id         = new TEntry('id');
+        $nome       = new TEntry('nome');
+        $email      = new TEntry('email');
+        $telefone   = new TEntry('telefone');
+        $cpf_cnpj   = new TEntry('cpf_cnpj');
 
-        $this->form->addAction('Pesquisar', new TAction([$this, 'onSearch']), 'fa:search blue');
+        $id->setSize('80');
+        $nome->setSize('250');
+        $email->setSize('250');
+        $telefone->setSize('250');
+        $cpf_cnpj->setSize('250');
+
+        $id->setMask('99 9999');
+
+        $this->form->addFields( [new TLabel(_t('ID'))],   [$id]);
+        $this->form->addFields( [new TLabel(_t('Name'))], [$nome] );
+        $this->form->addFields( [new TLabel(_t('Email'))],[$email] );
+        $this->form->addFields( [new TLabel(_t('Phone'))],[$telefone] );
+
+        $this->form->addAction(_t('Search'),   new TAction([$this, 'onSearch']), 'fa:search blue');
+        $this->form->addAction(_t('Clear'),    new TAction([$this, 'onClear']),  'fa:eraser blue');
 
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->datagrid->style = 'width: 100%';
 
-        $col_id = new TDataGridColumn('id', 'ID', 'center', '10%');
-        $col_nome = new TDataGridColumn('nome', 'Nome', 'left', '40%');
-        $col_data_nascimento = new TDataGridColumn('data_nascimento', 'Data Nascimento', 'center', '20%');
-        $col_tipo_pessoa = new TDataGridColumn('tipo_pessoa->nome', 'Tipo Pessoa', 'left', '30%');
-        $col_telefone = new TDataGridColumn('telefone', 'Telefone', 'left', '30%');
+        $col_id         = new TDataGridColumn('id',         _t('ID'),       'center',   '5%');
+        $col_nome       = new TDataGridColumn('nome',       _t('Name'),     'left',     '20%');
+        $col_email      = new TDataGridColumn('email_list_br',      _t('Email'),    'left',     '20%');
+        $col_email->setTransformer(function($value){return $value;});
+
+        $col_telefone   = new TDataGridColumn('telefone_list_br',   _t('Phone'),    'left',     '20%');
+        $col_telefone->setTransformer(function($value){return $value;});
+
+        $col_cpf_cnpj   = new TDataGridColumn('cpf_or_cnpj',   _t('Cpf/Cnpj'), 'left',     '20%');
+        $col_bloqueado  = new TDataGridColumn('bloqueado_icon',  _t('Blocked'),  'left',     '15%');
+        $col_bloqueado->setTransformer(function($value){return $value;});
 
         $this->datagrid->addColumn($col_id);
         $this->datagrid->addColumn($col_nome);
-        $this->datagrid->addColumn($col_data_nascimento);
-        $this->datagrid->addColumn($col_tipo_pessoa);
+        $this->datagrid->addColumn($col_email);
+        $this->datagrid->addColumn($col_telefone);
+        $this->datagrid->addColumn($col_cpf_cnpj);
+        $this->datagrid->addColumn($col_bloqueado);
 
-        $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);
-        $this->datagrid->addAction($action_edit, 'Editar', 'fa:edit blue');
+        $action1 = new TDataGridAction([$this, 'onEdit'],     ['key' => '{id}'] );
+        $action2 = new TDataGridAction([$this, 'onBlock'],    ['key' => '{id}' ] );
+
+        $action1->setLabel(_t('Edit'));
+        $action1->setImage('fa:search blue');
+        $action2->setLabel(_t('Block').'/'._t('Unlock'));
+        $action2->setImage('fa:ban red');
+
+        $action_group = new TDataGridActionGroup('Ação ', 'fa:th blue');
+        $action_group->addAction($action1);
+        $action_group->addAction($action2);
+        
+        $this->datagrid->addActionGroup($action_group);
 
         $this->datagrid->createModel();
 
@@ -69,42 +108,115 @@ class PessoaList extends TPage
         parent::add($vbox);
     }
 
+    public function onClear($param)
+    {
+        // Limpa o filtro da sessão
+        TSession::setValue('PessoaList_filter', null);
+        
+        // Limpa os dados do formulário
+        $this->form->clear(true);
+        
+        // Recarrega a listagem
+        $this->onReload();
+    }
+
     public function onSearch()
     {
         $data = $this->form->getData();
         $criteria = new TCriteria;
 
-        if (!empty($data->nome)) {
-            $criteria->add(new TFilter('nome', 'LIKE', "%{$data->nome}%"));
-        }
+        if ((int)$data->id > 0) 
+            $criteria->add(new TFilter('id', '=', $data->id));
+        elseif (!empty($data->nome)) 
+            $criteria->add(new TFilter('nome', 'ILIKE', "%{$data->nome}%"));
 
         TSession::setValue('PessoaList_filter', $criteria);
         $this->onReload();
+
+        $this->form->setData($data);
     }
 
-    public function onReload()
+    public function onBlock($param)
     {
-        TTransaction::open('avaliafit');
-
-        $criteria = new TCriteria;
-        $repository = new TRepository('Pessoa');
-        $limit = 10;
-        $param['offset'] = (TSession::getValue('page') - 1) * $limit;
-        $param['limit'] = $limit;
-
-        $objects = $repository->load($criteria, $param);
-        $this->datagrid->clear();
-
-        if ($objects) {
-            foreach ($objects as $object) {
-                $this->datagrid->addItem($object);
-            }
+        if((int)$param['id'] > 0)
+        {
+            $action1 = new TAction(array($this, 'Block'));
+            $action1->setParameter('id', $param['id']);
+            
+            new TQuestion(_t('Do you want to block/unblock the registration?'), $action1);
         }
+        
+    }
 
-        $this->pageNavigation->setCount($repository->count($criteria));
-        $this->pageNavigation->setProperties(['page' => TSession::getValue('page') ?? 1, 'limit' => $limit]);
+    public function Block($param)
+    {
+        if((int)$param['id'] > 0)
+        {
+            TTransaction::open('avaliafit');
 
-        TTransaction::close();
+            $pessoa = new Pessoa($param['id']);
+            if($pessoa)
+            {   
+                if($pessoa->bloqueado == 2)
+                    $pessoa->bloqueado = 1;
+                elseif($pessoa->bloqueado == 1)
+                    $pessoa->bloqueado = 2;
+                
+                $pessoa->save();
+            }
+
+            TTransaction::close();
+            $this->onReload();
+        }
+    }
+
+    public function onReload($param = null)
+    {
+        try
+        {
+            TTransaction::open('avaliafit');
+
+            $repository = new TRepository('Pessoa');
+            $limit = 10;
+
+            $criteria = new TCriteria;
+
+
+            if (TSession::getValue('PessoaList_filter'))
+            {
+                $criteria = TSession::getValue('PessoaList_filter');
+            }
+
+            $criteria->setProperty('limit', $limit);
+            $criteria->setProperty('offset', (isset($param['offset'])) ? (int) $param['offset'] : 0);
+            $criteria->setProperty('order', 'id asc');
+            
+            $objects = $repository->load($criteria, FALSE);
+
+            $this->datagrid->clear();
+            if ($objects)
+            {
+                foreach ($objects as $object)
+                {
+                    $this->datagrid->addItem($object);
+                }
+            }
+
+            $criteria->resetProperties();
+            $count = $repository->count($criteria);
+
+            $this->pageNavigation->setCount($count); 
+            $this->pageNavigation->setProperties($param);
+            $this->pageNavigation->setLimit($limit);
+
+            TTransaction::close();
+            $this->loaded = true;
+        }
+        catch (Exception $e)
+        {
+            new TMessage('error', $e->getMessage());
+            TTransaction::rollback();
+        }
     }
 
     public function onEdit($param)

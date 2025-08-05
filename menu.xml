@@ -83,19 +83,20 @@
         </menu>
     </menuitem>
         
-    <menuitem label='Cadastros'>
+    <menuitem label='_t{Registrations}'>
         <menu>
-            <menuitem label='Pessoas'>
+            <menuitem label='_t{People}'>
                 <icon></icon>
                 <action>PessoaList</action>
             </menuitem>
-            <menuitem label='Common page 2'>
+            <menuitem label='_t{Registration assistant}'>
                 <icon></icon>
-                <action>CommonPage</action>
-            </menuitem>
-            <menuitem label='Common page 3'>
-                <icon></icon>
-                <action>CommonPage</action>
+                <menu>
+                    <menuitem label='_t{Type of person}' >
+                        <icon></icon>
+                        <action>PessoaList</action>
+                    </menuitem>
+                </menu>
             </menuitem>
         </menu>
     </menuitem>

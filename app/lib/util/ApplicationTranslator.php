@@ -21,11 +21,44 @@ class ApplicationTranslator
      * Class Constructor
      */
     private function __construct()
-    {
+    {        
+
         $this->messages = [];
         $this->messages['en'] = [];
         $this->messages['pt'] = [];
         $this->messages['es'] = [];
+
+        $this->messages['en'][] = 'ID';
+        $this->messages['pt'][] = 'Cód';
+        $this->messages['es'][] = 'Id';
+
+        $this->messages['en'][] = 'Name';
+        $this->messages['pt'][] = 'Nome';
+        $this->messages['es'][] = 'Nombre';
+
+        $this->messages['en'][] = 'Email';
+        $this->messages['pt'][] = 'Email';
+        $this->messages['es'][] = 'Correo electrónico';
+
+        $this->messages['en'][] = 'Phone';
+        $this->messages['pt'][] = 'Telefone';
+        $this->messages['es'][] = 'Teléfono';
+
+        $this->messages['en'][] = 'People';
+        $this->messages['pt'][] = 'Pessoas';
+        $this->messages['es'][] = 'Gente';
+
+        $this->messages['en'][] = 'Registration assistant';
+        $this->messages['pt'][] = 'Auxiliar cadastros';
+        $this->messages['es'][] = 'Asistente de registro';
+
+        $this->messages['en'][] = 'Type of person';
+        $this->messages['pt'][] = 'Tipo pessoa';
+        $this->messages['es'][] = 'Tipo de persona';
+
+        $this->messages['en'][] = 'Registrations';
+        $this->messages['pt'][] = 'Cadastros';
+        $this->messages['es'][] = 'Inscripciones';
         
         $this->messages['en'][] = 'University';
         $this->messages['pt'][] = 'Universidade';
@@ -34,6 +67,39 @@ class ApplicationTranslator
         $this->messages['en'][] = 'City';
         $this->messages['pt'][] = 'Cidade';
         $this->messages['es'][] = 'Ciudad';
+
+        $this->messages['en'][] = 'Cpf/Cnpj';
+        $this->messages['pt'][] = 'Cpf/Cnpj';
+        $this->messages['es'][] = 'Cpf/Cnpj';
+
+        $this->messages['en'][] = 'Blocked';
+        $this->messages['pt'][] = 'Bloqueado';
+        $this->messages['es'][] = 'Obstruido';
+
+        $this->messages['en'][] = 'Block';
+        $this->messages['pt'][] = 'Bloquear';
+        $this->messages['es'][] = 'Bloquear';
+
+        $this->messages['en'][] = 'Edit';
+        $this->messages['pt'][] = 'Editar';
+        $this->messages['es'][] = 'Editar';
+
+        $this->messages['en'][] = 'Search';
+        $this->messages['pt'][] = 'Buscar';
+        $this->messages['es'][] = 'Buscar';
+
+        $this->messages['en'][] = 'Clear';
+        $this->messages['pt'][] = 'Limpar';
+        $this->messages['es'][] = 'Limpiar';
+
+        $this->messages['en'][] = 'Unlock';
+        $this->messages['pt'][] = 'Desbloquear';
+        $this->messages['es'][] = 'Desbloquear';
+
+        $this->messages['en'][] = 'Do you want to block/unblock the registration?';
+        $this->messages['pt'][] = 'Deseja bloquear/desbloquear o cadastro?';
+        $this->messages['es'][] = 'Quieres bloquear/desbloquear el registro?
+';
         
         foreach ($this->messages as $lang => $messages)
         {

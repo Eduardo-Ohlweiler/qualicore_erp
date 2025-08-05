@@ -3,12 +3,12 @@ return [
     'general' =>  [
         'timezone' => 'America/Sao_Paulo',
         'language' => 'pt',
-        'application' => 'template',
+        'application' => 'avalia_fit',
         'title' => 'AvaliaFit',
         'theme' => 'adminbs5',
         'seed' => 'odfu6asnodf8as',
         'rest_key' => '',
-        'multiunit' => '1',
+        'multiunit' => '2',
         'public_view' => '0',
         'public_entry' => '',
         'debug' => '1',
@@ -44,11 +44,11 @@ return [
           'SystemPasswordRenewalForm',
           'SystemConcurrentAccessView'
         ],
-        'user_register' => '1',
+        'user_register' => '2',
         'reset_password' => '1',
         'default_groups' => '2',
         'default_screen' => '30',
-        'default_units' => '1',
+        'default_units' => '2',
     ],
     'highlight' => [
         'comment' => '#808080',
@@ -58,19 +58,19 @@ return [
         'string' => '#FFC472',
     ],
     'login' => [
-        'logo' => '',
+        'logo' => '../images/logoescuro 500x336.jpg',
         'background' => ''
     ],
     'template' => [
         'navbar' => [
-            'has_program_search' => '1',
-            'has_notifications' => '1',
-            'has_messages' => '1',
-            'has_docs' => '1',
-            'has_contacts' => '1',
-            'has_support_form' => '1',
-            'has_wiki' => '1',
-            'has_news' => '1',
+            'has_program_search' => '2',
+            'has_notifications' => '2',
+            'has_messages' => '2',
+            'has_docs' => '2',
+            'has_contacts' => '2',
+            'has_support_form' => '2',
+            'has_wiki' => '2',
+            'has_news' => '2',
             'has_menu_mode_switch' => '1',
             'has_main_mode_switch' => '1'
         ],
@@ -78,9 +78,9 @@ return [
             'use_swal' => '1'
         ],
         'theme' => [
-            'menu_dark_color' => 'rgb(29 45 83)',
+            'menu_dark_color' => 'black',
             'menu_mode'  => 'dark',
-            'main_mode'  => 'light'
+            'main_mode'  => 'dark'
         ]
     ]
 ];
