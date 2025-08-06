@@ -100,6 +100,14 @@ class ApplicationTranslator
         $this->messages['pt'][] = 'Desbloquear';
         $this->messages['es'][] = 'Desbloquear';
 
+        $this->messages['en'][] = 'Email type';
+        $this->messages['pt'][] = 'Tipo email';
+        $this->messages['es'][] = 'Tipo de correo electrónico';
+
+        $this->messages['en'][] = 'Address type';
+        $this->messages['pt'][] = 'Tipo endereço';
+        $this->messages['es'][] = 'Tipo de dirección';
+
         $this->messages['en'][] = 'Do you want to block/unblock the registration?';
         $this->messages['pt'][] = 'Deseja bloquear/desbloquear o cadastro?';
         $this->messages['es'][] = '¿Quieres bloquear/desbloquear el registro?';

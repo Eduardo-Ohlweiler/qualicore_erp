@@ -96,6 +96,14 @@
                         <icon></icon>
                         <action>TipoCadastroFormList</action>
                     </menuitem>
+                    <menuitem label='_t{Email type}' >
+                        <icon></icon>
+                        <action>TipoEmailFormList</action>
+                    </menuitem>
+                    <menuitem label='_t{Address type}' >
+                        <icon></icon>
+                        <action>TipoEnderecoFormList</action>
+                    </menuitem>
                 </menu>
             </menuitem>
         </menu>
