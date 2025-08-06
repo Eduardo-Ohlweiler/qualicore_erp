@@ -104,6 +104,10 @@ class ApplicationTranslator
         $this->messages['pt'][] = 'Tipo email';
         $this->messages['es'][] = 'Tipo de correo electrónico';
 
+        $this->messages['en'][] = 'Phone type';
+        $this->messages['pt'][] = 'Tipo telefone';
+        $this->messages['es'][] = 'Tipo de teléfono';
+
         $this->messages['en'][] = 'Address type';
         $this->messages['pt'][] = 'Tipo endereço';
         $this->messages['es'][] = 'Tipo de dirección';

@@ -104,6 +104,10 @@
                         <icon></icon>
                         <action>TipoEnderecoFormList</action>
                     </menuitem>
+                    <menuitem label='_t{Phone type}' >
+                        <icon></icon>
+                        <action>TipoTelefoneFormList</action>
+                    </menuitem>
                 </menu>
             </menuitem>
         </menu>
