@@ -92,9 +92,9 @@
             <menuitem label='_t{Registration assistant}'>
                 <icon></icon>
                 <menu>
-                    <menuitem label='_t{Type of person}' >
+                    <menuitem label='_t{Registration type}' >
                         <icon></icon>
-                        <action>PessoaList</action>
+                        <action>TipoCadastroFormList</action>
                     </menuitem>
                 </menu>
             </menuitem>

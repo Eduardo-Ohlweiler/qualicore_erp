@@ -9,6 +9,9 @@ class Pessoa extends TRecord
     const PRIMARYKEY = 'id';
     const IDPOLICY   = 'max';
 
+    private $tipo_cadastro;
+    private $tipo_pessoa;
+
     public function __construct($id = NULL, $callObjectLoad = TRUE)
     {
         parent::__construct($id, $callObjectLoad);
@@ -21,6 +24,22 @@ class Pessoa extends TRecord
         parent::addAttribute('tipo_pessoa_id');
         parent::addAttribute('user_id');
         parent::addAttribute(attribute: 'bloqueado');
+    }
+
+    public function get_tipo_pessoa()
+    {
+        if(empty($this->tipo_pessoa))
+            $this->tipo_pessoa = new TipoPessoa($this->tipo_pessoa_id);
+
+        return $this->tipo_pessoa;
+    }
+
+    public function get_tipo_cadastro()
+    {
+        if(empty($this->tipo_cadastro))
+            $this->tipo_cadastro = new TipoCadastro($this->tipo_cadastro_id);
+
+        return $this->tipo_cadastro;
     }
 
     public function get_cpf_or_cnpj()

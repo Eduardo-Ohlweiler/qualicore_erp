@@ -59,6 +59,10 @@ class ApplicationTranslator
         $this->messages['en'][] = 'Registrations';
         $this->messages['pt'][] = 'Cadastros';
         $this->messages['es'][] = 'Inscripciones';
+
+        $this->messages['en'][] = 'Registration type';
+        $this->messages['pt'][] = 'Tipo cadastro';
+        $this->messages['es'][] = 'Tipo de registro';
         
         $this->messages['en'][] = 'University';
         $this->messages['pt'][] = 'Universidade';
@@ -98,8 +102,15 @@ class ApplicationTranslator
 
         $this->messages['en'][] = 'Do you want to block/unblock the registration?';
         $this->messages['pt'][] = 'Deseja bloquear/desbloquear o cadastro?';
-        $this->messages['es'][] = 'Quieres bloquear/desbloquear el registro?
-';
+        $this->messages['es'][] = '¿Quieres bloquear/desbloquear el registro?';
+
+        $this->messages['en'][] = 'Do you want to delete the registration?';
+        $this->messages['pt'][] = 'Deseja excluir o cadastro?';
+        $this->messages['es'][] = '¿Quieres eliminar el registro??';
+
+        $this->messages['en'][] = 'There is already a registration with that name, check!';
+        $this->messages['pt'][] = 'Já existe um cadastro com esse nome, verifique!';
+        $this->messages['es'][] = 'Ya existe un registro con ese nombre, ¡comprueba!';
         
         foreach ($this->messages as $lang => $messages)
         {

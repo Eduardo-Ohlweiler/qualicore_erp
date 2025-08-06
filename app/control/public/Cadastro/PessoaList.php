@@ -33,7 +33,7 @@ class PessoaList extends TPage
         parent::__construct();
 
         $this->form = new BootstrapFormBuilder('form_search_Pessoa');
-        $this->form->setFormTitle('Pessoas');
+        $this->form->setFormTitle(_t('People'));
 
         $id         = new TEntry('id');
         $nome       = new TEntry('nome');
@@ -129,6 +129,12 @@ class PessoaList extends TPage
             $criteria->add(new TFilter('id', '=', $data->id));
         elseif (!empty($data->nome)) 
             $criteria->add(new TFilter('nome', 'ILIKE', "%{$data->nome}%"));
+        elseif (!empty($data->email)) 
+            $criteria->add(new TFilter('', 'EXISTS', "(SELECT null FROM email e
+                                                                                                WHERE e.email ILIKE %{$data->email}% AND e.pessoa_id = pessoa.id)"));
+        elseif (!empty($data->telefone)) 
+            $criteria->add(new TFilter('', 'EXISTS', "(SELECT null FROM telefone t
+                                                                                                WHERE t.numero ILIKE %{$data->telefone}% AND t.pessoa_id = pessoa.id)"));
 
         TSession::setValue('PessoaList_filter', $criteria);
         $this->onReload();
@@ -178,9 +184,9 @@ class PessoaList extends TPage
 
             $repository = new TRepository('Pessoa');
             $limit = 10;
-
+            $user = TSession::getValue('userid');
             $criteria = new TCriteria;
-
+            $criteria->add(new TFilter('user_id', '=', $user));
 
             if (TSession::getValue('PessoaList_filter'))
             {
