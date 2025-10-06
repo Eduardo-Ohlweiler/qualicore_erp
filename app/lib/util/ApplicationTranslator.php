@@ -28,6 +28,18 @@ class ApplicationTranslator
         $this->messages['pt'] = [];
         $this->messages['es'] = [];
 
+        $this->messages['en'][] = 'Shift';
+        $this->messages['pt'][] = 'Turno';
+        $this->messages['es'][] = 'Cambio';
+
+        $this->messages['en'][] = 'Reason';
+        $this->messages['pt'][] = 'Motivo';
+        $this->messages['es'][] = 'Razón';
+
+        $this->messages['en'][] = 'Reason for Cancellation';
+        $this->messages['pt'][] = 'Motivo Cancelamento';
+        $this->messages['es'][] = 'Motivo de la cancelación';
+
         $this->messages['en'][] = 'To go back';
         $this->messages['pt'][] = 'Voltar';
         $this->messages['es'][] = 'Volver';

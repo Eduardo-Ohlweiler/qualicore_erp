@@ -536,3 +536,63 @@ CREATE TABLE maquina (
     nome VARCHAR(255) NOT NULL,
     bloqueado SMALLINT NOT NULL DEFAULT 2
 );
+
+-- Tabela: motivo_cancelamento
+CREATE TABLE motivo_cancelamento (
+    id SERIAL PRIMARY KEY,
+    motivo VARCHAR(255) NOT NULL,
+    bloqueado INT NOT NULL
+);
+
+CREATE TABLE turno (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    bloqueado SMALLINT NOT NULL DEFAULT 2
+);
+
+-- Tabela: conferencia_usinagem
+CREATE TABLE conferencia_usinagem (
+    id SERIAL PRIMARY KEY,
+    data DATE NOT NULL,
+    ordem_servico INT,
+    insumo_id INT REFERENCES insumo(id),
+    quantidade_total INT NOT NULL,
+    quantidade_refugo INT NOT NULL,
+    quantidade_retrabalho INT NOT NULL,
+    criado_em DATE NOT NULL,
+    alterado_em DATE,
+    criado_por INT NOT NULL REFERENCES system_users(id),
+    alterado_por INT REFERENCES system_users(id),
+    cancelado INT DEFAULT 0,
+    motivo_cancelamento_id INT REFERENCES motivo_cancelamento(id)
+);
+
+CREATE TABLE conferencia_usinagem (
+    id SERIAL PRIMARY KEY,
+    data DATE NOT NULL,
+    ordem_servico INT,
+    insumo_id INT REFERENCES insumo(id),
+    quantidade_total INT NOT NULL,
+    quantidade_refugo INT,
+    quantidade_retrabalho INT,
+    criado_em DATE NOT NULL,
+    alterado_em DATE,
+    criado_por INT NOT NULL REFERENCES system_users(id),
+    alterado_por INT REFERENCES system_users(id),
+    cancelado INT DEFAULT 0,
+    motivo_cancelamento_id INT REFERENCES motivo_cancelamento(id)
+);
+
+CREATE TABLE conferencia_usinagem_detalhamento (
+    id SERIAL PRIMARY KEY,
+    conferencia_usinagem_id INT NOT NULL REFERENCES conferencia_usinagem(id),
+    data DATE NOT NULL,
+    retrabalho INT,
+    maquina_id INT REFERENCES maquina(id),
+    pessoa_id INT REFERENCES pessoa(id),
+    turno_id INT REFERENCES turno(id),
+    quantidade_retrabalho INT NOT NULL,
+    quantidade_refugo INT NOT NULL,
+    obs TEXT
+);
+

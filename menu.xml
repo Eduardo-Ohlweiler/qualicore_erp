@@ -91,32 +91,7 @@
                     <menuitem label='_t{Person}'>
                         <icon></icon>
                         <action>PessoaList</action>
-                    </menuitem>
-                    <menuitem label='_t{Registration assistant}'>
-                        <icon></icon>
-                        <menu>
-                            <menuitem label='_t{Machine}' >
-                                <icon></icon>
-                                <action>MaquinaFormList</action>
-                            </menuitem>
-                            <menuitem label='_t{Registration type}' >
-                                <icon></icon>
-                                <action>TipoCadastroFormList</action>
-                            </menuitem>
-                            <menuitem label='_t{Email type}' >
-                                <icon></icon>
-                                <action>TipoEmailFormList</action>
-                            </menuitem>
-                            <menuitem label='_t{Address type}' >
-                                <icon></icon>
-                                <action>TipoEnderecoFormList</action>
-                            </menuitem>
-                            <menuitem label='_t{Phone type}' >
-                                <icon></icon>
-                                <action>TipoTelefoneFormList</action>
-                            </menuitem>
-                        </menu>
-                    </menuitem>
+                    </menuitem>                    
                 </menu>
             </menuitem>
             
@@ -129,29 +104,29 @@
                     </menuitem>
                     <menuitem label='_t{Help products}'>
                         <icon></icon>
-                        <menu>
-                            
-                            <menuitem label='_t{Registration type}' >
-                                <icon></icon>
-                                <action>TipoCadastroFormList</action>
-                            </menuitem>
-                            <menuitem label='_t{Email type}' >
-                                <icon></icon>
-                                <action>TipoEmailFormList</action>
-                            </menuitem>
-                            <menuitem label='_t{Address type}' >
-                                <icon></icon>
-                                <action>TipoEnderecoFormList</action>
-                            </menuitem>
+                        <menu>                    
                             <menuitem label='_t{Input type}' >
                                 <icon></icon>
                                 <action>TipoInsumoFormList</action>
                             </menuitem>
-                            <menuitem label='_t{Phone type}' >
-                                <icon></icon>
-                                <action>TipoTelefoneFormList</action>
-                            </menuitem>
                         </menu>
+                    </menuitem>
+                </menu>
+            </menuitem>
+            <menuitem label='_t{Registration assistant}'>
+                <icon></icon>
+                <menu>
+                    <menuitem label='_t{Machine}' >
+                        <icon></icon>
+                        <action>MaquinaFormList</action>
+                    </menuitem>
+                    <menuitem label='_t{Reason for Cancellation}' >
+                        <icon></icon>
+                        <action>MotivoCancelamentoFormList</action>
+                    </menuitem>
+                    <menuitem label='_t{Shift}' >
+                        <icon></icon>
+                        <action>TurnoFormList</action>
                     </menuitem>
                 </menu>
             </menuitem>

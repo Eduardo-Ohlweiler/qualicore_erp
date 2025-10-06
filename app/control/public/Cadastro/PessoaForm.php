@@ -64,9 +64,9 @@ class PessoaForm extends TPage
         $criou_pessoa_nome->setSize('300');
         $alterou_pessoa_nome->setSize('300');
 
-        $this->form->addFields([new TLabel(_t('ID'))], [$id]);
+        $this->form->addFields([new TLabel(_t('ID'))],          [$id]);
         $this->form->addFields([new TLabel(_t('Name').' (*)')], [$nome]);
-        $this->form->addFields([new TLabel(_t('Blocked'))], [$bloqueado]);
+        $this->form->addFields([new TLabel(_t('Blocked'))],     [$bloqueado]);
 
         $this->form->addFields([new TLabel('Criado')],   [$criou_pessoa_id,   $criou_pessoa_nome,   $criado_em]);
         $this->form->addFields([new TLabel('Alterado')], [$alterou_pessoa_id, $alterou_pessoa_nome, $alterado_em]);
