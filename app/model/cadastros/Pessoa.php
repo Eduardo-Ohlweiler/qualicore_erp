@@ -23,6 +23,11 @@ class Pessoa extends TRecord
         parent::addAttribute('bloqueado');
     }
 
+    public function get_nome_id()
+{
+    return "{$this->nome} ({$this->id})";
+}
+
 
     public function get_bloqueado_icon()
     {

@@ -28,6 +28,26 @@ class ApplicationTranslator
         $this->messages['pt'] = [];
         $this->messages['es'] = [];
 
+        $this->messages['en'][] = 'Rework';
+        $this->messages['pt'][] = 'Retrabalho';
+        $this->messages['es'][] = 'Rehacer';
+
+        $this->messages['en'][] = 'Operator';
+        $this->messages['pt'][] = 'Operador';
+        $this->messages['es'][] = 'Operador';
+
+        $this->messages['en'][] = 'Amount of scrap';
+        $this->messages['pt'][] = 'Quantidade de refugo';
+        $this->messages['es'][] = 'Cantidad de chatarra';
+
+        $this->messages['en'][] = 'Rework quantity';
+        $this->messages['pt'][] = 'Quantidade de retrabalho';
+        $this->messages['es'][] = 'Cantidad de retrabajo';
+
+        $this->messages['en'][] = 'Record saved successfully!';
+        $this->messages['pt'][] = 'Registro salvo com sucesso!';
+        $this->messages['es'][] = '¡Registro guardado exitosamente!';
+
         $this->messages['en'][] = 'Machining conference';
         $this->messages['pt'][] = 'Conferência de usinagem';
         $this->messages['es'][] = 'conferencia de mecanizado';
