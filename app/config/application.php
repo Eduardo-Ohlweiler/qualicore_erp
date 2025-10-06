@@ -3,8 +3,8 @@ return [
     'general' =>  [
         'timezone' => 'America/Sao_Paulo',
         'language' => 'pt',
-        'application' => 'avalia_fit',
-        'title' => 'AvaliaFit',
+        'application' => 'qualicore',
+        'title' => 'QualiCore Erp',
         'theme' => 'adminbs5',
         'seed' => 'odfu6asnodf8as',
         'rest_key' => '',
@@ -58,7 +58,7 @@ return [
         'string' => '#FFC472',
     ],
     'login' => [
-        'logo' => '../images/logoescuro 500x336.jpg',
+        'logo' => '../images/qualicorelogo500x336.jpg',
         'background' => ''
     ],
     'template' => [

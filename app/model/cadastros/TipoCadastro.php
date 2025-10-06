@@ -12,7 +12,6 @@ class TipoCadastro extends TRecord
     {
         parent::__construct($id, $callObjectLoad);
         parent::addAttribute('nome');
-        parent::addAttribute('user_id');
     }
 
 }

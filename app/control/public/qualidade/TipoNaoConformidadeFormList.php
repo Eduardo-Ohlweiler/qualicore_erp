@@ -17,13 +17,14 @@ use Adianti\Widget\Datagrid\TDataGridColumn;
 use Adianti\Widget\Datagrid\TPageNavigation;
 use Adianti\Widget\Dialog\TMessage;
 use Adianti\Widget\Dialog\TQuestion;
+use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Util\TXMLBreadCrumb;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-class TipoEnderecoFormList extends TPage
+class TipoNaoConformidadeFormList extends TPage
 {
     private $form;
     private $datagrid;
@@ -33,22 +34,30 @@ class TipoEnderecoFormList extends TPage
     {
         parent::__construct();
 
-        $this->form = new BootstrapFormBuilder('form_search_TipoEndereco');
-        $this->form->setFormTitle(_t('Address type'));
+        $this->form = new BootstrapFormBuilder('form_search_TipoNaoConformidade');
+        $this->form->setFormTitle(_t('Types of non-compliance'));
 
         $id         = new TEntry('id');
-        $nome       = new TEntry('nome');
+        $descricao  = new TEntry('descricao');
+        $bloqueado  = new TCombo('bloqueado');
+        $bloqueado->addItems([
+            1 => _t('Yes'),
+            2 => _t('No')
+        ]);
 
         $id->setSize('80');
-        $nome->setSize('250');
+        $descricao->setSize('250');
+        $bloqueado->setSize('100');
 
         $id->setMask('99 9999');
         $id->setEditable(false);
 
-        $nome->addValidation(_t('Name'), new TRequiredValidator);
+        $descricao->addValidation(_t('Description'), new TRequiredValidator);
+        $bloqueado->addValidation(_t('Blocked'), new TRequiredValidator);
 
-        $this->form->addFields( [new TLabel(_t('ID'))],   [$id]);
-        $this->form->addFields( [new TLabel(_t('Name').' (*)')], [$nome] );
+        $this->form->addFields( [new TLabel(_t('ID'))],                 [$id]);
+        $this->form->addFields( [new TLabel(_t('Description').' (*)')], [$descricao] );
+        $this->form->addFields( [new TLabel(_t('Blocked'))],            [$bloqueado]);
 
         $this->form->addAction(_t('Save'),  new TAction([$this, 'onSave']), 'far:save green');
         $this->form->addAction(_t('Clear'), new TAction([$this, 'onClear']),  'fa:eraser blue');
@@ -56,8 +65,8 @@ class TipoEnderecoFormList extends TPage
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->datagrid->style = 'width: 100%';
 
-        $col_id         = new TDataGridColumn('id',         _t('ID'),       'center',   '5%');
-        $col_nome       = new TDataGridColumn('nome',       _t('Name'),     'left',     '95%');
+        $col_id         = new TDataGridColumn('id',         _t('ID'),         'center',   '5%');
+        $col_descricao  = new TDataGridColumn('descricao',  _t('Description'),'left',     '95%');
 
         $action1 = new TDataGridAction([$this, 'onEdit'],   ['key'=>'{id}'] );
         $action2 = new TDataGridAction([$this, 'onDelete'], ['key'=>'{id}'] );
@@ -69,7 +78,7 @@ class TipoEnderecoFormList extends TPage
         $this->datagrid->addAction($action2, '', 'far:trash-alt red');
 
         $this->datagrid->addColumn($col_id);
-        $this->datagrid->addColumn($col_nome);
+        $this->datagrid->addColumn($col_descricao);
 
         $this->datagrid->createModel();
 
@@ -102,9 +111,9 @@ class TipoEnderecoFormList extends TPage
     {
         if((int)$param['id'] > 0)
         {
-            TTransaction::open('avaliafit');
+            TTransaction::open('permission');
 
-            $object = new TipoEndereco($param['id']);
+            $object = new TipoTelefone($param['id']);
             $object->delete();
 
             TTransaction::close();
@@ -119,34 +128,33 @@ class TipoEnderecoFormList extends TPage
             $data = $this->form->getData();
             $this->form->validate();
 
-            $user = TSession::getValue('userid');
-            if(!empty($data->nome))
+            if(!empty($data->descricao))
             {
-                TTransaction::open('avaliafit');
-                $tipo_email = TipoEndereco::where('user_id = '.$user.' and id <> '.(int)$data->id.' and nome','ilike', $data->nome)->first();
-                if($tipo_email)
+                TTransaction::open('permission');
+                $tipo_nao_conformidade = TipoNaoConformidade::where('id <> '.(int)$data->id.' and descricao','ilike', $data->descricao)->first();
+                if($tipo_nao_conformidade)
                     throw new Exception(_t('There is already a registration with that name, check!'));
 
                 if((int)$data->id > 0)
-                    $object = new TipoEndereco($data->id);
+                    $object = new TipoNaoConformidade($data->id);
                 else
-                    $object = new TipoEndereco();
-                $object->nome = $data->nome;
-                $object->user_id = $user;
+                    $object = new TipoNaoConformidade();
+                $object->descricao = $data->descricao;
+                $object->bloqueado = $data->bloqueado;
 
                 $object->save();
 
                 TTransaction::close();
 
-                $data->id   = '';
-                $data->nome = '';
+                $data->id        = '';
+                $data->descricao = '';
                 $this->form->setData($data);
 
                 $this->onReload();
             }
 
         }
-        catch (Exception $e) // in case of exception
+        catch (Exception $e)
         {
             new TMessage('error', $e->getMessage());
             TTransaction::rollback();
@@ -164,17 +172,15 @@ class TipoEnderecoFormList extends TPage
     {
         try
         {
-            TTransaction::open('avaliafit');
+            TTransaction::open('permission');
 
-            $repository = new TRepository('TipoEndereco');
+            $repository = new TRepository('TipoNaoConformidade');
             $limit = 10;
-            $user = TSession::getValue('userid');
             $criteria = new TCriteria;
-            $criteria->add(new TFilter('user_id', '=', $user));
 
             $criteria->setProperty('limit', $limit);
             $criteria->setProperty('offset', (isset($param['offset'])) ? (int) $param['offset'] : 0);
-            $criteria->setProperty('order', 'nome asc');
+            $criteria->setProperty('order', 'descricao asc');
             
             $objects = $repository->load($criteria, FALSE);
 
@@ -211,15 +217,16 @@ class TipoEnderecoFormList extends TPage
 
         if((int)$key > 0)
         {
-            TTransaction::open('avaliafit');
+            TTransaction::open('permission');
 
-            $object = new TipoEndereco((int)$key);            
+            $object = new TipoNaoConformidade((int)$key);            
 
             TTransaction::close();
             if($object)
             {
-                $data->id = $object->id;
-                $data->nome = $object->nome;
+                $data->id        = $object->id;
+                $data->descricao = $object->descricao;
+                $data->bloqueado = $object->bloqueado;
             }
 
             $this->form->setData($data);

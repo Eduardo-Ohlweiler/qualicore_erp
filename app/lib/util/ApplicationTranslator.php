@@ -28,6 +28,58 @@ class ApplicationTranslator
         $this->messages['pt'] = [];
         $this->messages['es'] = [];
 
+        $this->messages['en'][] = 'To go back';
+        $this->messages['pt'][] = 'Voltar';
+        $this->messages['es'][] = 'Volver';
+
+        $this->messages['en'][] = 'Save';
+        $this->messages['pt'][] = 'Salvar';
+        $this->messages['es'][] = 'Ahorrar';
+
+        $this->messages['en'][] = 'Person registration';
+        $this->messages['pt'][] = 'Cadastro de pessoa';
+        $this->messages['es'][] = 'Registro de persona';
+
+        $this->messages['en'][] = 'Machine';
+        $this->messages['pt'][] = 'Máquina';
+        $this->messages['es'][] = 'Máquina';
+
+        $this->messages['en'][] = 'Quality assistant';
+        $this->messages['pt'][] = 'Auxiliar qualidade';
+        $this->messages['es'][] = 'Asistente de calidad';
+
+        $this->messages['en'][] = 'Types of non-compliance';
+        $this->messages['pt'][] = 'Tipos de não conformidade';
+        $this->messages['es'][] = 'Tipos de incumplimiento';
+
+        $this->messages['en'][] = 'Machining notes';
+        $this->messages['pt'][] = 'Apontamentos usinagem';
+        $this->messages['es'][] = 'Notas de mecanizado';
+
+        $this->messages['en'][] = 'Conferences';
+        $this->messages['pt'][] = 'Conferências';
+        $this->messages['es'][] = 'Conferencias';
+
+        $this->messages['en'][] = 'Machining Conference';
+        $this->messages['pt'][] = 'Conferência usinagem';
+        $this->messages['es'][] = 'Conferencia de mecanizado';
+
+        $this->messages['en'][] = 'Quality';
+        $this->messages['pt'][] = 'Qualidade';
+        $this->messages['es'][] = 'Calidad';
+
+        $this->messages['pt'][] = 'Cadastro de Insumo';
+        $this->messages['en'][] = 'Input Registration';
+        $this->messages['es'][] = 'Registro de entrada';
+
+        $this->messages['pt'][] = 'Cadastro de Insumo';
+        $this->messages['en'][] = 'Input Registration';
+        $this->messages['es'][] = 'Registro de entrada';
+
+        $this->messages['pt'][] = 'Código desenho';
+        $this->messages['en'][] = 'Drawing code';
+        $this->messages['es'][] = 'Codigo de dibujo';
+
         $this->messages['en'][] = 'ID';
         $this->messages['pt'][] = 'Cód';
         $this->messages['es'][] = 'Id';
@@ -35,6 +87,26 @@ class ApplicationTranslator
         $this->messages['en'][] = 'Name';
         $this->messages['pt'][] = 'Nome';
         $this->messages['es'][] = 'Nombre';
+
+        $this->messages['en'][] = 'Products';
+        $this->messages['pt'][] = 'Produtos';
+        $this->messages['es'][] = 'Productos';
+
+        $this->messages['en'][] = 'Product';
+        $this->messages['pt'][] = 'Produto';
+        $this->messages['es'][] = 'Producto';
+
+        $this->messages['en'][] = 'Inputs';
+        $this->messages['pt'][] = 'Insumos';
+        $this->messages['es'][] = 'Entradas';
+
+        $this->messages['en'][] = 'Description';
+        $this->messages['pt'][] = 'Descrição';
+        $this->messages['es'][] = 'Descripción';
+
+        $this->messages['en'][] = 'Code';
+        $this->messages['pt'][] = 'Código';
+        $this->messages['es'][] = 'Código';
 
         $this->messages['en'][] = 'Email';
         $this->messages['pt'][] = 'Email';
@@ -47,6 +119,10 @@ class ApplicationTranslator
         $this->messages['en'][] = 'People';
         $this->messages['pt'][] = 'Pessoas';
         $this->messages['es'][] = 'Gente';
+
+        $this->messages['en'][] = 'Person';
+        $this->messages['pt'][] = 'Pessoa';
+        $this->messages['es'][] = 'Persona';
 
         $this->messages['en'][] = 'Registration assistant';
         $this->messages['pt'][] = 'Auxiliar cadastros';
@@ -112,6 +188,14 @@ class ApplicationTranslator
         $this->messages['pt'][] = 'Tipo endereço';
         $this->messages['es'][] = 'Tipo de dirección';
 
+        $this->messages['en'][] = 'Input type';
+        $this->messages['pt'][] = 'Tipo insumo';
+        $this->messages['es'][] = 'Tipo de entrada';
+
+        $this->messages['en'][] = 'Help products';
+        $this->messages['pt'][] = 'Auxiliar produtos';
+        $this->messages['es'][] = 'Productos de ayuda';
+
         $this->messages['en'][] = 'Do you want to block/unblock the registration?';
         $this->messages['pt'][] = 'Deseja bloquear/desbloquear o cadastro?';
         $this->messages['es'][] = '¿Quieres bloquear/desbloquear el registro?';
@@ -123,6 +207,10 @@ class ApplicationTranslator
         $this->messages['en'][] = 'There is already a registration with that name, check!';
         $this->messages['pt'][] = 'Já existe um cadastro com esse nome, verifique!';
         $this->messages['es'][] = 'Ya existe un registro con ese nombre, ¡comprueba!';
+
+        $this->messages['en'][] = 'There is already a registration with this code, check it!';
+        $this->messages['pt'][] = 'Já existe um cadastro com esse código, verifique!';
+        $this->messages['es'][] = 'Ya existe un registro con este código, ¡compruébalo!';
         
         foreach ($this->messages as $lang => $messages)
         {

@@ -18,7 +18,6 @@ class Endereco extends TRecord
         parent::addAttribute('bairro');
         parent::addAttribute('numero');
         parent::addAttribute('complemento');
-        parent::addAttribute('user_id');
     }
 
 }

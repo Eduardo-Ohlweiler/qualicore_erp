@@ -23,7 +23,7 @@ use Adianti\Widget\Util\TXMLBreadCrumb;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-class TipoEmailFormList extends TPage
+class TipoInsumoFormList extends TPage
 {
     private $form;
     private $datagrid;
@@ -33,8 +33,8 @@ class TipoEmailFormList extends TPage
     {
         parent::__construct();
 
-        $this->form = new BootstrapFormBuilder('form_search_TipoEmail');
-        $this->form->setFormTitle(_t('Email type'));
+        $this->form = new BootstrapFormBuilder('form_search_TipoInsumo');
+        $this->form->setFormTitle(_t('Input type'));
 
         $id         = new TEntry('id');
         $nome       = new TEntry('nome');
@@ -102,9 +102,9 @@ class TipoEmailFormList extends TPage
     {
         if((int)$param['id'] > 0)
         {
-            TTransaction::open('avaliafit');
+            TTransaction::open('permission');
 
-            $object = new TipoEmail($param['id']);
+            $object = new TipoInsumo($param['id']);
             $object->delete();
 
             TTransaction::close();
@@ -119,20 +119,18 @@ class TipoEmailFormList extends TPage
             $data = $this->form->getData();
             $this->form->validate();
 
-            $user = TSession::getValue('userid');
             if(!empty($data->nome))
             {
-                TTransaction::open('avaliafit');
-                $tipo_email = TipoEmail::where('user_id = '.$user.' and id <> '.(int)$data->id.' and nome','ilike', $data->nome)->first();
-                if($tipo_email)
+                TTransaction::open('permission');
+                $tipo_insumo = TipoInsumo::where('id <> '.(int)$data->id.' and nome','ilike', $data->nome)->first();
+                if($tipo_insumo)
                     throw new Exception(_t('There is already a registration with that name, check!'));
 
                 if((int)$data->id > 0)
-                    $object = new TipoEmail($data->id);
+                    $object = new TipoInsumo($data->id);
                 else
-                    $object = new TipoEmail();
+                    $object = new TipoInsumo();
                 $object->nome = $data->nome;
-                $object->user_id = $user;
 
                 $object->save();
 
@@ -164,13 +162,11 @@ class TipoEmailFormList extends TPage
     {
         try
         {
-            TTransaction::open('avaliafit');
+            TTransaction::open('permission');
 
-            $repository = new TRepository('TipoEmail');
+            $repository = new TRepository('TipoInsumo');
             $limit = 10;
-            $user = TSession::getValue('userid');
             $criteria = new TCriteria;
-            $criteria->add(new TFilter('user_id', '=', $user));
 
             $criteria->setProperty('limit', $limit);
             $criteria->setProperty('offset', (isset($param['offset'])) ? (int) $param['offset'] : 0);
@@ -211,9 +207,9 @@ class TipoEmailFormList extends TPage
 
         if((int)$key > 0)
         {
-            TTransaction::open('avaliafit');
+            TTransaction::open('permission');
 
-            $object = new TipoEmail((int)$key);            
+            $object = new TipoInsumo((int)$key);            
 
             TTransaction::close();
             if($object)

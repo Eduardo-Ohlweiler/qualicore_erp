@@ -15,7 +15,7 @@ use Adianti\Widget\Dialog\TMessage;
 use Adianti\Widget\Container\TVBox;
 use Adianti\Widget\Util\TXMLBreadCrumb;
 
-class PessoaForm extends TPage
+class InsumoForm extends TPage
 {
     private $form;
 
@@ -23,11 +23,13 @@ class PessoaForm extends TPage
     {
         parent::__construct();
 
-        $this->form = new BootstrapFormBuilder('form_Pessoa');
-        $this->form->setFormTitle(_t('Person registration'));
+        $this->form = new BootstrapFormBuilder('form_Insumo');
+        $this->form->setFormTitle(_t('Input Registration'));
 
         $id             = new TEntry('id');
-        $nome           = new TEntry('nome');
+        $descricao      = new TEntry('descricao');
+        $codigo         = new TEntry('codigo');
+        $tipo_insumo_id = new TDBCombo('tipo_insumo_id', 'permission', 'TipoInsumo', 'id', 'nome');
         $bloqueado      = new TCombo('bloqueado');
         $bloqueado->addItems([
             1 => _t('Yes'),
@@ -54,26 +56,34 @@ class PessoaForm extends TPage
         $alterado_em->setMask('dd/mm/yyyy');
         $alterado_em->setDatabaseMask('yyyy-mm-dd');
 
-        $nome->addValidation(_t('Name'), new TRequiredValidator);
+        $descricao->addValidation(_t('Description'), new TRequiredValidator);
+        $codigo->addValidation(_t('Drawing code'), new TRequiredValidator);
+        $tipo_insumo_id->addValidation(_t('Input type'), new TRequiredValidator);
 
         $id->setSize('80');
         $bloqueado->setSize('100');
-        $nome->setSize('80%');
+        $descricao->setSize('80%');
+        $codigo->setSize('200');
+        $tipo_insumo_id->setSize('200');
         $criou_pessoa_id->setSize('80');
         $alterou_pessoa_id->setSize('80');
         $criou_pessoa_nome->setSize('300');
         $alterou_pessoa_nome->setSize('300');
 
+        $codigo->setMask('9999999999');
+
         $this->form->addFields([new TLabel(_t('ID'))], [$id]);
-        $this->form->addFields([new TLabel(_t('Name').' (*)')], [$nome]);
+        $this->form->addFields([new TLabel(_t('Drawing code').' (*)')], [$codigo]);
+        $this->form->addFields([new TLabel(_t('Description').' (*)')], [$descricao]);
+        $this->form->addFields([new TLabel(_t('Input type').' (*)')], [$tipo_insumo_id]);
         $this->form->addFields([new TLabel(_t('Blocked'))], [$bloqueado]);
 
-        $this->form->addFields([new TLabel('Criado')],   [$criou_pessoa_id,   $criou_pessoa_nome,   $criado_em]);
+        $this->form->addFields([new TLabel('Criado')], [$criou_pessoa_id, $criou_pessoa_nome, $criado_em]);
         $this->form->addFields([new TLabel('Alterado')], [$alterou_pessoa_id, $alterou_pessoa_nome, $alterado_em]);
 
         $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'fa:save green');
         $this->form->addAction(_t('New'), new TAction([$this, 'onClear']), 'fa:plus blue');
-        $this->form->addAction(_t('To go back'), new TAction(['PessoaList', 'onReload']), 'fa:arrow-left blue');
+        $this->form->addAction(_t('To go back'), new TAction(['InsumoList', 'onReload']), 'fa:arrow-left blue');
 
         $vbox = new TVBox;
         $vbox->style = 'width: 100%';
@@ -94,9 +104,13 @@ class PessoaForm extends TPage
 
             TTransaction::open('permission');
 
+            $insumo = Insumo::where('id <> '.(int)$data->id.' and codigo','ilike', $data->codigo)->first();
+                if($insumo)
+                    throw new Exception(_t('There is already a registration with this code, check it!'));
+
             if((int)$data->id > 0)
             {
-                $object = new Pessoa($data->id);
+                $object = new Insumo($data->id);
                 $object->alterado_em       = date('Y-m-d');
                 $object->alterou_pessoa_id = TSession::getValue('userid');
 
@@ -104,13 +118,15 @@ class PessoaForm extends TPage
             }
             else 
             {
-                $object = new Pessoa();
+                $object = new Insumo();
                 $object->criado_em       = date('Y-m-d');
                 $object->criou_pessoa_id = TSession::getValue('userid');
                 $object->criou_pessoa_nome = SystemUser::find(TSession::getValue('userid'))->name;
             }
-            $object->nome      = $data->nome;
-            $object->bloqueado = $data->bloqueado ?? 2;
+            $object->descricao      = $data->descricao;
+            $object->codigo         = $data->codigo;
+            $object->bloqueado      = $data->bloqueado ?? 2;
+            $object->tipo_insumo_id = $data->tipo_insumo_id;
             $object->store();
             TTransaction::close();            
 
@@ -135,10 +151,12 @@ class PessoaForm extends TPage
                 $key = $param['key'];
 
                 TTransaction::open('permission');
-                $object = new Pessoa($key);
+                $object = new Insumo($key);
 
                 $data->id             = $key;
-                $data->nome         = $object->nome;
+                $data->codigo         = $object->codigo;
+                $data->descricao      = $object->descricao;
+                $data->tipo_insumo_id = $object->tipo_insumo_id;
                 $data->bloqueado      = $object->bloqueado;
 
                 if((int)$object->criou_pessoa_id > 0)

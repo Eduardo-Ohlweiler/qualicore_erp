@@ -19,10 +19,12 @@ use Adianti\Widget\Dialog\TQuestion;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Util\TXMLBreadCrumb;
+use Adianti\Widget\Wrapper\TDBCombo;
+use Adianti\Widget\Wrapper\TDBUniqueSearch;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-class PessoaList extends TPage
+class InsumoList extends TPage
 {
     private $form;
     private $datagrid;
@@ -32,19 +34,25 @@ class PessoaList extends TPage
     {
         parent::__construct();
 
-        $this->form = new BootstrapFormBuilder('form_search_Pessoa');
-        $this->form->setFormTitle(_t('People'));
+        $this->form = new BootstrapFormBuilder('form_search_Insumo');
+        $this->form->setFormTitle(_t('Inputs'));
 
-        $id         = new TEntry('id');
-        $nome       = new TEntry('nome');
+        $id             = new TEntry('id');
+        $decricao       = new TEntry('descricao');
+        $codigo         = new TEntry('codigo');
+        $tipo_insumo_id = new TDBCombo('tipo_insumo_id', 'permission', 'TipoInsumo', 'id', 'nome');
 
         $id->setSize('80');
-        $nome->setSize('250');
+        $decricao->setSize('250');
+        $codigo->setSize('250');
+        $tipo_insumo_id->setSize('250');
 
         $id->setMask('99 9999');
 
-        $this->form->addFields( [new TLabel(_t('ID'))],   [$id]);
-        $this->form->addFields( [new TLabel(_t('Name'))], [$nome] );
+        $this->form->addFields( [new TLabel(_t('ID'))],          [$id]);
+        $this->form->addFields( [new TLabel(_t('Drawing code'))],[$codigo] );
+        $this->form->addFields( [new TLabel(_t('Description'))], [$decricao] );
+        $this->form->addFields( [new TLabel(_t('Input type'))],  [$tipo_insumo_id] );
 
         $this->form->addAction(_t('Search'),   new TAction([$this, 'onSearch']), 'fa:search blue');
         $this->form->addAction(_t('Clear'),    new TAction([$this, 'onClear']),  'fa:eraser blue');
@@ -53,14 +61,18 @@ class PessoaList extends TPage
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->datagrid->style = 'width: 100%';
 
-        $col_id         = new TDataGridColumn('id',         _t('ID'),       'center',   '5%');
-        $col_nome       = new TDataGridColumn('nome',       _t('Name'),     'left',     '80%');
+        $col_id          = new TDataGridColumn('id',               _t('ID'),          'center',   '5%');
+        $col_codigo      = new TDataGridColumn('codigo',           _t('Drawing code'),        'left',     '20%');
+        $col_descricao   = new TDataGridColumn('descricao',        _t('Description'), 'left',     '20%');
+        $col_tipo_insumo = new TDataGridColumn('tipo_insumo->nome', _t('Input type'),  'left',     '20%');
 
-        $col_bloqueado  = new TDataGridColumn('bloqueado_icon',  _t('Blocked'),  'left',     '15%');
+        $col_bloqueado   = new TDataGridColumn('bloqueado_icon',  _t('Blocked'),  'left',     '15%');
         $col_bloqueado->setTransformer(function($value){return $value;});
 
         $this->datagrid->addColumn($col_id);
-        $this->datagrid->addColumn($col_nome);
+        $this->datagrid->addColumn($col_codigo);
+        $this->datagrid->addColumn($col_descricao);
+        $this->datagrid->addColumn($col_tipo_insumo);
         $this->datagrid->addColumn($col_bloqueado);
 
         $action1 = new TDataGridAction([$this, 'onEdit'],     ['key' => '{id}'] );
@@ -94,10 +106,10 @@ class PessoaList extends TPage
 
     public function onClear($param)
     {
-        TSession::setValue('PessoaList_filter', null);
-        TSession::setValue('PessoaList_data',   null);     
-        $this->form->clear(true);
+        TSession::setValue('InsumoList_filter', null);
+        TSession::setValue('InsumoList_data',   null);
         
+        $this->form->clear(true);
         $this->onReload();
     }
 
@@ -108,11 +120,15 @@ class PessoaList extends TPage
 
         if ((int)$data->id > 0) 
             $criteria->add(new TFilter('id', '=', $data->id));
-        elseif (!empty($data->nome)) 
-            $criteria->add(new TFilter('nome', 'ILIKE', "%{$data->nome}%"));
+        if (!empty($data->descricao)) 
+            $criteria->add(new TFilter('descricao', 'ILIKE', "%{$data->descricao}%"));
+        if ((int)$data->tipo_insumo_id > 0) 
+            $criteria->add(new TFilter('tipo_insumo_id', '=', $data->tipo_insumo_id));
+        if (!empty($data->codigo)) 
+            $criteria->add(new TFilter('codigo', 'ILIKE', "%{$data->codigo}%"));
 
-        TSession::setValue('PessoaList_filter', $criteria);
-        TSession::setValue('PessoaList_data',   $data);
+        TSession::setValue('InsumoList_filter', $criteria);
+        TSession::setValue('InsumoList_data', $data);
         $this->onReload();
 
         $this->form->setData($data);
@@ -130,21 +146,26 @@ class PessoaList extends TPage
         
     }
 
+    public function onNew()
+    {
+        TApplication::loadPage('InsumoForm', 'onEdit', ['key' => null]);        
+    }
+
     public function Block($param)
     {
         if((int)$param['id'] > 0)
         {
             TTransaction::open('permission');
 
-            $pessoa = new Pessoa($param['id']);
-            if($pessoa)
+            $insumo = new Insumo($param['id']);
+            if($insumo)
             {   
-                if($pessoa->bloqueado == 2)
-                    $pessoa->bloqueado = 1;
-                elseif($pessoa->bloqueado == 1)
-                    $pessoa->bloqueado = 2;
+                if($insumo->bloqueado == 2)
+                    $insumo->bloqueado = 1;
+                elseif($insumo->bloqueado == 1)
+                    $insumo->bloqueado = 2;
                 
-                $pessoa->save();
+                $insumo->save();
             }
 
             TTransaction::close();
@@ -159,18 +180,18 @@ class PessoaList extends TPage
             $data = $this->form->getData();
             TTransaction::open('permission');
 
-            $repository = new TRepository('Pessoa');
+            $repository = new TRepository('Insumo');
             $limit = 10;
             $criteria = new TCriteria;
 
-            if (TSession::getValue('PessoaList_filter'))
-                $criteria = TSession::getValue('PessoaList_filter');
-            if (TSession::getValue('PessoaList_data'))
-                $data = TSession::getValue('PessoaList_data');
+            if (TSession::getValue('InsumoList_filter'))
+                $criteria = TSession::getValue('InsumoList_filter');
+            if (TSession::getValue('InsumoList_data'))
+                $data = TSession::getValue('InsumoList_data');
 
             $criteria->setProperty('limit', $limit);
             $criteria->setProperty('offset', (isset($param['offset'])) ? (int) $param['offset'] : 0);
-            $criteria->setProperty('order', 'id asc');
+            $criteria->setProperty('order', 'id desc');
             
             $objects = $repository->load($criteria, FALSE);
 
@@ -204,12 +225,7 @@ class PessoaList extends TPage
     public function onEdit($param)
     {
         $key = $param['id'];
-        TApplication::loadPage('PessoaForm', 'onEdit', ['key' => $key]);
-    }
-
-    public function onNew()
-    {
-        TApplication::loadPage('PessoaForm', 'onEdit', ['key' => null]);        
+        TApplication::loadPage('InsumoForm', 'onEdit', ['key' => $key]);
     }
 
     public function show()

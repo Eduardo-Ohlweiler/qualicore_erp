@@ -87,26 +87,94 @@
         <menu>
             <menuitem label='_t{People}'>
                 <icon></icon>
-                <action>PessoaList</action>
+                <menu>
+                    <menuitem label='_t{Person}'>
+                        <icon></icon>
+                        <action>PessoaList</action>
+                    </menuitem>
+                    <menuitem label='_t{Registration assistant}'>
+                        <icon></icon>
+                        <menu>
+                            <menuitem label='_t{Machine}' >
+                                <icon></icon>
+                                <action>MaquinaFormList</action>
+                            </menuitem>
+                            <menuitem label='_t{Registration type}' >
+                                <icon></icon>
+                                <action>TipoCadastroFormList</action>
+                            </menuitem>
+                            <menuitem label='_t{Email type}' >
+                                <icon></icon>
+                                <action>TipoEmailFormList</action>
+                            </menuitem>
+                            <menuitem label='_t{Address type}' >
+                                <icon></icon>
+                                <action>TipoEnderecoFormList</action>
+                            </menuitem>
+                            <menuitem label='_t{Phone type}' >
+                                <icon></icon>
+                                <action>TipoTelefoneFormList</action>
+                            </menuitem>
+                        </menu>
+                    </menuitem>
+                </menu>
             </menuitem>
-            <menuitem label='_t{Registration assistant}'>
+            
+            <menuitem label='_t{Products}'>
                 <icon></icon>
                 <menu>
-                    <menuitem label='_t{Registration type}' >
+                    <menuitem label='_t{Inputs}'>
                         <icon></icon>
-                        <action>TipoCadastroFormList</action>
+                        <action>InsumoList</action>
                     </menuitem>
-                    <menuitem label='_t{Email type}' >
+                    <menuitem label='_t{Help products}'>
                         <icon></icon>
-                        <action>TipoEmailFormList</action>
+                        <menu>
+                            
+                            <menuitem label='_t{Registration type}' >
+                                <icon></icon>
+                                <action>TipoCadastroFormList</action>
+                            </menuitem>
+                            <menuitem label='_t{Email type}' >
+                                <icon></icon>
+                                <action>TipoEmailFormList</action>
+                            </menuitem>
+                            <menuitem label='_t{Address type}' >
+                                <icon></icon>
+                                <action>TipoEnderecoFormList</action>
+                            </menuitem>
+                            <menuitem label='_t{Input type}' >
+                                <icon></icon>
+                                <action>TipoInsumoFormList</action>
+                            </menuitem>
+                            <menuitem label='_t{Phone type}' >
+                                <icon></icon>
+                                <action>TipoTelefoneFormList</action>
+                            </menuitem>
+                        </menu>
                     </menuitem>
-                    <menuitem label='_t{Address type}' >
+                </menu>
+            </menuitem>
+        </menu>
+    </menuitem>
+
+    <menuitem label='_t{Quality}'>
+        <menu>
+            <menuitem label='_t{Conferences}'>
+                <icon></icon>
+                <menu>
+                    <menuitem label='_t{Machining Conference}'>
                         <icon></icon>
-                        <action>TipoEnderecoFormList</action>
-                    </menuitem>
-                    <menuitem label='_t{Phone type}' >
+                        <action>TipoNaoConformidadeFormList</action>
+                    </menuitem>                    
+                </menu>
+            </menuitem>
+            <menuitem label='_t{Quality assistant}'>
+                <icon></icon>
+                <menu>
+                    <menuitem label='_t{Types of non-compliance}' >
                         <icon></icon>
-                        <action>TipoTelefoneFormList</action>
+                        <action>TipoNaoConformidadeFormList</action>
                     </menuitem>
                 </menu>
             </menuitem>

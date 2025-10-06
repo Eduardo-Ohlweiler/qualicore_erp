@@ -1,10 +1,10 @@
 <?php
 return [
-    'host'  =>  "",
-    'port'  =>  "",
-    'name'  =>  "app/database/permission.db",
-    'user'  =>  "",
-    'pass'  =>  "",
-    'type'  =>  "sqlite",
+    'host'  =>  "127.0.0.1",
+    'port'  =>  "5432",
+    'name'  =>  "permission",
+    'user'  =>  "postgres",
+    'pass'  =>  "admin",
+    'type'  =>  "pgsql",
     'prep'  =>  "1"
 ];

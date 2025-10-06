@@ -3,9 +3,9 @@
 use Adianti\Database\TRecord;
 use Adianti\Registry\TSession;
 
-class Pessoa extends TRecord
+class Maquina extends TRecord
 {
-    const TABLENAME  = 'pessoa';
+    const TABLENAME  = 'maquina';
     const PRIMARYKEY = 'id';
     const IDPOLICY   = 'serial';
 
@@ -16,10 +16,6 @@ class Pessoa extends TRecord
     {
         parent::__construct($id, $callObjectLoad);
         parent::addAttribute('nome');
-        parent::addAttribute('criado_em');
-        parent::addAttribute('alterado_em');
-        parent::addAttribute('criou_pessoa_id');
-        parent::addAttribute('alterou_pessoa_id');
         parent::addAttribute('bloqueado');
     }
 

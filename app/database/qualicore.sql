@@ -1,38 +1,32 @@
--- Tabela: tipo_telefone
+-- ========================
+-- Tabelas auxiliares
+-- ========================
+
 CREATE TABLE tipo_telefone (
     id SERIAL PRIMARY KEY,
-    nome TEXT,
-    user_id INTEGER
+    nome TEXT
 );
 
--- Tabela: tipo_pessoa
 CREATE TABLE tipo_pessoa (
     id SERIAL PRIMARY KEY,
     nome TEXT
 );
 
--- Tabela: tipo_endereco
 CREATE TABLE tipo_endereco (
     id SERIAL PRIMARY KEY,
-    nome TEXT,
-    user_id INTEGER
+    nome TEXT
 );
 
--- Tabela: tipo_email
 CREATE TABLE tipo_email (
     id SERIAL PRIMARY KEY,
-    nome TEXT,
-    user_id INTEGER
+    nome TEXT
 );
 
--- Tabela: tipo_cadastro
 CREATE TABLE tipo_cadastro (
     id SERIAL PRIMARY KEY,
-    nome TEXT,
-    user_id INTEGER
+    nome TEXT
 );
 
--- Tabela: estado
 CREATE TABLE estado (
     id SERIAL PRIMARY KEY,
     nome TEXT,
@@ -40,16 +34,17 @@ CREATE TABLE estado (
     codigo_ibge INTEGER
 );
 
--- Tabela: cidade
 CREATE TABLE cidade (
     id SERIAL PRIMARY KEY,
     nome TEXT,
-    user_id INTEGER,
     estado_id INTEGER REFERENCES estado(id),
     cep TEXT
 );
 
--- Tabela: pessoa
+-- ========================
+-- Pessoa
+-- ========================
+
 CREATE TABLE pessoa (
     id SERIAL PRIMARY KEY,
     nome TEXT,
@@ -59,21 +54,21 @@ CREATE TABLE pessoa (
     cnpj TEXT,
     tipo_cadastro_id INTEGER REFERENCES tipo_cadastro(id),
     tipo_pessoa_id INTEGER REFERENCES tipo_pessoa(id),
-    user_id INTEGER,
     bloqueado INTEGER
 );
 
--- Tabela: telefone
+-- ========================
+-- Contatos
+-- ========================
+
 CREATE TABLE telefone (
     id SERIAL PRIMARY KEY,
     pessoa_id INTEGER REFERENCES pessoa(id),
-    user_id INTEGER,
     tipo_telefone_id INTEGER REFERENCES tipo_telefone(id),
     numero TEXT,
     principal INTEGER
 );
 
--- Tabela: endereco
 CREATE TABLE endereco (
     id SERIAL PRIMARY KEY,
     tipo_endereco_id INTEGER REFERENCES tipo_endereco(id),
@@ -82,20 +77,43 @@ CREATE TABLE endereco (
     rua TEXT,
     bairro TEXT,
     numero TEXT,
-    complemento TEXT,
-    user_id INTEGER
+    complemento TEXT
 );
 
--- Tabela: email
 CREATE TABLE email (
     id SERIAL PRIMARY KEY,
     pessoa_id INTEGER REFERENCES pessoa(id),
-    user_id INTEGER,
     tipo_email_id INTEGER REFERENCES tipo_email(id),
     email TEXT,
     principal INTEGER
 );
 
+-- ========================
+-- Insumos
+-- ========================
+
+CREATE TABLE tipo_insumo (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE insumo (
+    id SERIAL PRIMARY KEY,
+    descricao VARCHAR(255) NOT NULL,
+    codigo VARCHAR(50) UNIQUE NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    alterado_em TIMESTAMP,
+    criou_pessoa_id INT,
+    alterou_pessoa_id INT,
+    tipo_insumo_id INT NOT NULL,
+    bloqueado INTEGER,
+    
+    CONSTRAINT fk_tipo_insumo FOREIGN KEY (tipo_insumo_id) REFERENCES tipo_insumo(id)
+);
+
+-- ========================
+-- Inserts iniciais
+-- ========================
 
 INSERT INTO estado (nome, sigla, codigo_ibge) VALUES
 ('Acre', 'AC', 12),
@@ -125,7 +143,6 @@ INSERT INTO estado (nome, sigla, codigo_ibge) VALUES
 ('São Paulo', 'SP', 35),
 ('Sergipe', 'SE', 28),
 ('Tocantins', 'TO', 17);
-
 
 INSERT INTO tipo_pessoa (nome) VALUES
 ('Física'),

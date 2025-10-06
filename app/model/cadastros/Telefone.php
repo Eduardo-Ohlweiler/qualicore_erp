@@ -12,7 +12,6 @@ class Telefone extends TRecord
     {
         parent::__construct($id, $callObjectLoad);
         parent::addAttribute('pessoa_id');
-        parent::addAttribute('user_id');
         parent::addAttribute('tipo_telefone_id');
         parent::addAttribute('numero');
         parent::addAttribute('principal');//1 ou 2

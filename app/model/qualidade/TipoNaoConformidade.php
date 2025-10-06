@@ -2,16 +2,17 @@
 
 use Adianti\Database\TRecord;
 
-class TipoTelefone extends TRecord
+class TipoNaoConformidade extends TRecord
 {
-    const TABLENAME  = 'tipo_telefone';
+    const TABLENAME  = 'tipo_nao_conformidade';
     const PRIMARYKEY = 'id';
     const IDPOLICY   = 'max';
 
     public function __construct($id = NULL, $callObjectLoad = TRUE)
     {
         parent::__construct($id, $callObjectLoad);
-        parent::addAttribute('nome');
+        parent::addAttribute('descricao');
+        parent::addAttribute('bloqueado');
     }
 
 }

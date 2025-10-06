@@ -12,7 +12,6 @@ class Email extends TRecord
     {
         parent::__construct($id, $callObjectLoad);
         parent::addAttribute('pessoa_id');
-        parent::addAttribute('user_id');
         parent::addAttribute('tipo_email_id');
         parent::addAttribute('email');
         parent::addAttribute('principal');//1 ou 2

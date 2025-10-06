@@ -2,9 +2,9 @@
 
 use Adianti\Database\TRecord;
 
-class TipoTelefone extends TRecord
+class TipoInsumo extends TRecord
 {
-    const TABLENAME  = 'tipo_telefone';
+    const TABLENAME  = 'tipo_insumo';
     const PRIMARYKEY = 'id';
     const IDPOLICY   = 'max';
 
