@@ -28,6 +28,10 @@ class ApplicationTranslator
         $this->messages['pt'] = [];
         $this->messages['es'] = [];
 
+        $this->messages['en'][] = 'Machining conference';
+        $this->messages['pt'][] = 'Conferência de usinagem';
+        $this->messages['es'][] = 'conferencia de mecanizado';
+
         $this->messages['en'][] = 'Shift';
         $this->messages['pt'][] = 'Turno';
         $this->messages['es'][] = 'Cambio';

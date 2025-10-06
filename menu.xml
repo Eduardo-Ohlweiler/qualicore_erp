@@ -138,9 +138,9 @@
             <menuitem label='_t{Conferences}'>
                 <icon></icon>
                 <menu>
-                    <menuitem label='_t{Machining Conference}'>
+                    <menuitem label='_t{Machining conference}'>
                         <icon></icon>
-                        <action>TipoNaoConformidadeFormList</action>
+                        <action>ConferenciaUsinagemList</action>
                     </menuitem>                    
                 </menu>
             </menuitem>

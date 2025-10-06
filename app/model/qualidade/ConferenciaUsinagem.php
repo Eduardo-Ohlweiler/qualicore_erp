@@ -42,14 +42,14 @@ class ConferenciaUsinagem extends TRecord
     public function get_criado_por_usuario()
     {
         if (empty($this->criado_por_usuario))
-            $this->criado_por_usuario = new SystemUsers($this->criado_por);
+            $this->criado_por_usuario = new SystemUser($this->criado_por);
         return $this->criado_por_usuario;
     }
 
     public function get_alterado_por_usuario()
     {
         if (empty($this->alterado_por_usuario))
-            $this->alterado_por_usuario = new SystemUsers($this->alterado_por);
+            $this->alterado_por_usuario = new SystemUser($this->alterado_por);
         return $this->alterado_por_usuario;
     }
 
@@ -63,10 +63,10 @@ class ConferenciaUsinagem extends TRecord
     public function get_conferencia_usinagem_detalhamento()
     {
         $ret = '';
-        $conferencia_usinagem_detalhamento = ConferenciaUsinagemDetalhamento::where('conferencia_usinagem_id', $this->id)->load();
+        $conferencia_usinagem_detalhamento = ConferenciaUsinagemDetalhamento::where('conferencia_usinagem_id', '=', $this->id)->load();
         if(!empty($conferencia_usinagem_detalhamento))
             $ret = $conferencia_usinagem_detalhamento;
-        
+
         return $ret;
     }
 }

@@ -145,7 +145,7 @@ class ConferenciaUsinagemList extends TPage
 
     public function onNew()
     {
-        TApplication::loadPage('InsumoForm', 'onEdit', ['key' => null]);        
+        TApplication::loadPage('ConferenciaUsinagemForm', 'onEdit', ['key' => null]);        
     }
 
     public function Block($param)
