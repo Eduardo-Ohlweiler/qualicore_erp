@@ -11,6 +11,7 @@ use Adianti\Widget\Form\TFieldList;
 use Adianti\Widget\Form\THidden;
 use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Form\TDate;
+use Adianti\Widget\Form\TText;
 use Adianti\Widget\Wrapper\TDBCombo;
 use Adianti\Wrapper\BootstrapFormBuilder;
 use Adianti\Widget\Dialog\TMessage;
@@ -29,6 +30,9 @@ class ConferenciaUsinagemForm extends TPage
         $this->form->setFormTitle(_t('Machining conference'));
 
         $id             = new TEntry('id');
+        $data = new TDate('data');
+        $insumo_id = new TDBCombo('insumo_id', 'permission', 'Insumo', 'id', 'codigo_descricao');
+        $quantidade_total = new TEntry('quantidade_total');
 
         $criou_pessoa_id     = new TEntry('criou_pessoa_id');
         $criou_pessoa_nome   = new TEntry('criou_pessoa_nome');
@@ -49,6 +53,9 @@ class ConferenciaUsinagemForm extends TPage
         $criado_em->setDatabaseMask('yyyy-mm-dd');
         $alterado_em->setMask('dd/mm/yyyy');
         $alterado_em->setDatabaseMask('yyyy-mm-dd');
+        $quantidade_total->setMask('9999999999');
+        $data->setMask('dd/mm/yyyy');
+        $data->setDatabaseMask('yyyy-mm-dd');
 
         //$nome->addValidation(_t('Name'), new TRequiredValidator);
 
@@ -57,8 +64,14 @@ class ConferenciaUsinagemForm extends TPage
         $alterou_pessoa_id->setSize('80');
         $criou_pessoa_nome->setSize('300');
         $alterou_pessoa_nome->setSize('300');
+        $data->setSize('150');
+        $insumo_id->setSize('80%');
+        $quantidade_total->setSize('100');
 
         $this->form->addFields([new TLabel(_t('ID'))],          [$id]);
+        $this->form->addFields([new TLabel(_t('Date'))],        [$data]);
+        $this->form->addFields([new TLabel(_t('Part'))],        [$insumo_id]);
+        $this->form->addFields([new TLabel(_t('Total quantity'))], [$quantidade_total]);
 
         $this->form->addFields([new TLabel('Criado')],   [$criou_pessoa_id,   $criou_pessoa_nome,   $criado_em]);
         $this->form->addFields([new TLabel('Alterado')], [$alterou_pessoa_id, $alterou_pessoa_nome, $alterado_em]);
@@ -67,7 +80,8 @@ class ConferenciaUsinagemForm extends TPage
         // =================== DETALHAMENTO ===================
         // ====================================================
 
-        $detalhamento_id         = new THidden('detalhamento_id[]');
+        $detalhamento_id                        = new THidden('detalhamento_id[]');
+        $detalhamento_conferencia_usinagem_id   = new THidden('detalhamento_conferencia_usinagem_id[]');
 
         $detalhamento_maquina_id = new TDBCombo('detalhamento_maquina_id[]', 'permission', 'Maquina', 'id', 'nome');
         $detalhamento_maquina_id->enableSearch();
@@ -81,10 +95,10 @@ class ConferenciaUsinagemForm extends TPage
         $detalhamento_turno_id->enableSearch();
         $detalhamento_turno_id->setSize('100%');
 
-        $detalhamento_refugo = new TCombo('detalhamento_refugo[]');
-        $detalhamento_refugo->enableSearch();
-        $detalhamento_refugo->addItems(['1'=>'<b>'._t('Yes').'</b>','2'=>'<b>'._t('No').'</b>']);
-        $detalhamento_refugo->setSize('100%');
+        $detalhamento_refugo_sim_nao = new TCombo('detalhamento_refugo_sim_nao[]');
+        $detalhamento_refugo_sim_nao->enableSearch();
+        $detalhamento_refugo_sim_nao->addItems(['1'=>'<b>'._t('Yes').'</b>','2'=>'<b>'._t('No').'</b>']);
+        $detalhamento_refugo_sim_nao->setSize('100%');
         
         $quantidade_retrabalho = new TEntry('quantidade_retrabalho[]');
         $quantidade_retrabalho->setMask('9999999999');
@@ -95,27 +109,46 @@ class ConferenciaUsinagemForm extends TPage
         $quantidade_refugo->setMask('9999999999');
         $quantidade_refugo->setSize('100%');
         $quantidade_refugo->style = 'text-align: right';
+
+        $margem_reprovacao = new TEntry('margem_reprovacao[]');
+        $margem_reprovacao->setNumericMask(2,',','.', true);
+        $margem_reprovacao->setSize('100%');
+        $margem_reprovacao->style = 'text-align: right';
+        $margem_reprovacao->setEditable(false);
+
+        $margem_retrabalho = new TEntry('margem_retrabalho[]');
+        $margem_retrabalho->setNumericMask(2,',','.', true);
+        $margem_retrabalho->setSize('100%');
+        $margem_retrabalho->style = 'text-align: right';
+        $margem_retrabalho->setEditable(false);
         
-        $date = new TDate('date[]');
-        $date->setSize('100%');
+        $detalhamento_data = new TDate('detalhamento_data[]');
+        $detalhamento_data->setSize('100%');
+        $detalhamento_data->setMask('dd/mm/yyyy');
+        $detalhamento_data->setDatabaseMask('yyyy-mm-dd');
         
         $this->fieldlist = new TFieldList();
         $this->fieldlist->generateAria();
         $this->fieldlist->width = '100%';
         $this->fieldlist->name  = 'my_field_list';
-        $this->fieldlist->addField( '<b>'._t('Date').' (*)</b>',        $date,                          ['width' => '150'] );
-        $this->fieldlist->addField( '<b>'._t('Operator').'</b>',        $detalhamento_pessoa_id,        ['width' => '200'] );        
-        $this->fieldlist->addField( '<b>'._t('Machine').'</b>',         $detalhamento_maquina_id,       ['width' => '200'] );
-        $this->fieldlist->addField( '<b>'._t('Shift').'</b>',           $detalhamento_turno_id,         ['width' => '100'] );
-        $this->fieldlist->addField( '<b>'._t('Rework').'</b>',           $detalhamento_refugo,           ['width' => '80'] );
-        $this->fieldlist->addField( '<b>'._t('Rework quantity').' (*)</b>', $quantidade_retrabalho,     ['width' => '120', 'sum' => true] );
-        $this->fieldlist->addField( '<b>'._t('Amount of scrap').' (*)</b>', $quantidade_refugo,         ['width' => '120', 'sum' => true] );
-        $this->fieldlist->addField( '<b>Detalhamento id</b>',                $detalhamento_id,               ['width' => '0%', 'uniqid' => true] );
+        $this->fieldlist->addField( '<b>'._t('Date').' (*)</b>',            $detalhamento_data,             ['width' => '150'] );
+        $this->fieldlist->addField( '<b>'._t('Operator').'</b>',            $detalhamento_pessoa_id,        ['width' => '180'] );        
+        $this->fieldlist->addField( '<b>'._t('Machine').'</b>',             $detalhamento_maquina_id,       ['width' => '150'] );
+        $this->fieldlist->addField( '<b>'._t('Shift').'</b>',               $detalhamento_turno_id,         ['width' => '100'] );        
+        $this->fieldlist->addField( '<b>'._t('Rework quantity').' (*)</b>', $quantidade_retrabalho,         ['width' => '50', 'sum' => true] );
+        $this->fieldlist->addField( '<b>'._t('Amount of scrap').' (*)</b>', $quantidade_refugo,             ['width' => '50', 'sum' => true] );
+
+        $this->fieldlist->addField( '<b>% Reprovado</b>', $margem_reprovacao, ['width' => '80', 'sum' => true] );
+        $this->fieldlist->addField( '<b>% Retrabalho</b>', $margem_retrabalho, ['width' => '80', 'sum' => true] );
+
+        $this->fieldlist->addField( '<b>'._t('Rework').'</b>',              $detalhamento_refugo_sim_nao,           ['width' => '80'] );
+        $this->fieldlist->addField( '<b>Detalhamento id</b>',                    $detalhamento_id,               ['width' => '0%', 'uniqid' => true] );
+        $this->fieldlist->addField( '<b>Detalhamento id</b>',                    $detalhamento_conferencia_usinagem_id,['width' => '0%'] );
         
         // $this->fieldlist->setTotalUpdateAction(new TAction([$this, 'x']));
         
         $this->fieldlist->enableSorting();
-        $this->form->addField($date);
+        //$this->form->addField($data);
         $this->form->addField($detalhamento_maquina_id);
         
                 
@@ -130,8 +163,8 @@ class ConferenciaUsinagemForm extends TPage
         // ================= FIM DETALHAMENTO =================
         // ====================================================
 
-        $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'fa:save green');
-        $this->form->addAction(_t('New'), new TAction([$this, 'onClear']), 'fa:plus blue');
+        $this->form->addAction(_t('Save'),       new TAction([$this, 'onSave']), 'fa:save green');
+        $this->form->addAction(_t('New'),        new TAction([$this, 'onClear']), 'fa:plus blue');
         $this->form->addAction(_t('To go back'), new TAction(['ConferenciaUsinagemList', 'onReload']), 'fa:arrow-left blue');
 
         $vbox = new TVBox;

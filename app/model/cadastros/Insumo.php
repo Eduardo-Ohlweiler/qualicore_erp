@@ -24,6 +24,11 @@ class Insumo extends TRecord
         parent::addAttribute('bloqueado');
     }
 
+    public function get_codigo_descricao ()
+    {
+        return '('.$this->codigo.') '.$this->descricao;
+    }
+
     public function get_tipo_insumo()
     {
         if(empty($this->tipo_insumo))

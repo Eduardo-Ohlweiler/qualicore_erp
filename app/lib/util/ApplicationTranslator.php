@@ -28,6 +28,18 @@ class ApplicationTranslator
         $this->messages['pt'] = [];
         $this->messages['es'] = [];
 
+        $this->messages['en'][] = 'Total quantity';
+        $this->messages['pt'][] = 'Quantidade total';
+        $this->messages['es'][] = 'Cantidad total';
+
+        $this->messages['en'][] = 'Part';
+        $this->messages['pt'][] = 'Peça';
+        $this->messages['es'][] = 'Parte';
+
+        $this->messages['en'][] = 'Observation';
+        $this->messages['pt'][] = 'Observação';
+        $this->messages['es'][] = 'Observación';
+
         $this->messages['en'][] = 'Rework';
         $this->messages['pt'][] = 'Retrabalho';
         $this->messages['es'][] = 'Rehacer';
