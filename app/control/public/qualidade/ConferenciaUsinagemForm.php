@@ -8,6 +8,7 @@ use Adianti\Validator\TRequiredValidator;
 use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TFieldList;
+use Adianti\Widget\Form\TForm;
 use Adianti\Widget\Form\THidden;
 use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Form\TDate;
@@ -29,22 +30,33 @@ class ConferenciaUsinagemForm extends TPage
         $this->form = new BootstrapFormBuilder('form_ConferenciaUsinagemForm');
         $this->form->setFormTitle(_t('Machining conference'));
 
-        $id             = new TEntry('id');
-        $data = new TDate('data');
-        $insumo_id = new TDBCombo('insumo_id', 'permission', 'Insumo', 'id', 'codigo_descricao');
-        $quantidade_total = new TEntry('quantidade_total');
+        $id                  = new TEntry('id');
+        $data_conferencia    = new TDate('data_conferencia');
+        $insumo_id           = new TDBCombo('insumo_id', 'permission', 'Insumo', 'id', 'codigo_descricao');
+        $quantidade_total    = new TEntry('quantidade_total');
+        $ordem_servico       = new TEntry('ordem_servico');
 
-        $criou_pessoa_id     = new TEntry('criou_pessoa_id');
+        $criado_por          = new TEntry('criado_por');
         $criou_pessoa_nome   = new TEntry('criou_pessoa_nome');
-        $alterou_pessoa_id   = new TEntry('alterou_pessoa_id');
+        $alterado_por        = new TEntry('alterado_por');
         $alterou_pessoa_nome = new TEntry('alterou_pessoa_nome');
         $criado_em           = new TDate('criado_em');
         $alterado_em         = new TDate('alterado_em');
 
+        $cancelado      = new TCombo('cancelado');
+        $cancelado->setChangeAction(new TAction([$this, 'onHabilitaDesabilita']));
+        $cancelado->addItems([
+            1 => _t('Yes'),
+            2 => _t('No')
+        ]);
+
+        $motivo_cancelamento_id = new TDBCombo('motivo_cancelamento_id', 'permission', 'MotivoCancelamento', 'id', 'motivo');
+        //$motivo_cancelamento_id->enableSearch();
+
         $id->setEditable(FALSE);
-        $criou_pessoa_id->setEditable(FALSE);
+        $criado_por->setEditable(FALSE);
         $criou_pessoa_nome->setEditable(FALSE);
-        $alterou_pessoa_id->setEditable(FALSE);
+        $alterado_por->setEditable(FALSE);
         $alterou_pessoa_nome->setEditable(FALSE);
         $criado_em->setEditable(FALSE);
         $alterado_em->setEditable(FALSE);
@@ -54,27 +66,35 @@ class ConferenciaUsinagemForm extends TPage
         $alterado_em->setMask('dd/mm/yyyy');
         $alterado_em->setDatabaseMask('yyyy-mm-dd');
         $quantidade_total->setMask('9999999999');
-        $data->setMask('dd/mm/yyyy');
-        $data->setDatabaseMask('yyyy-mm-dd');
+        $ordem_servico->setMask('999999999999');
+        $data_conferencia->setMask('dd/mm/yyyy');
+        $data_conferencia->setDatabaseMask('yyyy-mm-dd');
 
-        //$nome->addValidation(_t('Name'), new TRequiredValidator);
+        $data_conferencia->addValidation(_t('Date'),           new TRequiredValidator);
+        $quantidade_total->addValidation(_t('Total quantity'), new TRequiredValidator);
 
         $id->setSize('80');
-        $criou_pessoa_id->setSize('80');
-        $alterou_pessoa_id->setSize('80');
+        $criado_por->setSize('80');
+        $alterado_por->setSize('80');
         $criou_pessoa_nome->setSize('300');
         $alterou_pessoa_nome->setSize('300');
-        $data->setSize('150');
+        $data_conferencia->setSize('150');
         $insumo_id->setSize('80%');
+        $motivo_cancelamento_id->setSize('80%');
         $quantidade_total->setSize('100');
+        $cancelado->setSize('100');
+        $ordem_servico->setSize('150');
 
         $this->form->addFields([new TLabel(_t('ID'))],          [$id]);
-        $this->form->addFields([new TLabel(_t('Date'))],        [$data]);
+        $this->form->addFields([new TLabel(_t('Date').' (*)')],        [$data_conferencia]);
+        $this->form->addFields([new TLabel(_t('Service order'))],        [$ordem_servico]);
         $this->form->addFields([new TLabel(_t('Part'))],        [$insumo_id]);
-        $this->form->addFields([new TLabel(_t('Total quantity'))], [$quantidade_total]);
+        $this->form->addFields([new TLabel(_t('Total quantity').' (*)')], [$quantidade_total]);
+        $this->form->addFields([new TLabel(_t('Canceled'))], [$cancelado]);
+        $this->form->addFields([new TLabel(_t('Reason for cancellation'))], [$motivo_cancelamento_id]);
 
-        $this->form->addFields([new TLabel('Criado')],   [$criou_pessoa_id,   $criou_pessoa_nome,   $criado_em]);
-        $this->form->addFields([new TLabel('Alterado')], [$alterou_pessoa_id, $alterou_pessoa_nome, $alterado_em]);
+        $this->form->addFields([new TLabel('Criado')],   [$criado_por,   $criou_pessoa_nome,   $criado_em]);
+        $this->form->addFields([new TLabel('Alterado')], [$alterado_por, $alterou_pessoa_nome, $alterado_em]);
 
         // ====================================================
         // =================== DETALHAMENTO ===================
@@ -122,16 +142,10 @@ class ConferenciaUsinagemForm extends TPage
         $margem_retrabalho->style = 'text-align: right';
         $margem_retrabalho->setEditable(false);
         
-        $detalhamento_data = new TDate('detalhamento_data[]');
-        $detalhamento_data->setSize('100%');
-        $detalhamento_data->setMask('dd/mm/yyyy');
-        $detalhamento_data->setDatabaseMask('yyyy-mm-dd');
-        
         $this->fieldlist = new TFieldList();
         $this->fieldlist->generateAria();
         $this->fieldlist->width = '100%';
         $this->fieldlist->name  = 'my_field_list';
-        $this->fieldlist->addField( '<b>'._t('Date').' (*)</b>',            $detalhamento_data,             ['width' => '150'] );
         $this->fieldlist->addField( '<b>'._t('Operator').'</b>',            $detalhamento_pessoa_id,        ['width' => '180'] );        
         $this->fieldlist->addField( '<b>'._t('Machine').'</b>',             $detalhamento_maquina_id,       ['width' => '150'] );
         $this->fieldlist->addField( '<b>'._t('Shift').'</b>',               $detalhamento_turno_id,         ['width' => '100'] );        
@@ -175,10 +189,28 @@ class ConferenciaUsinagemForm extends TPage
         parent::add($vbox);
     }
 
-    public static function showRow($param)
-    {
-        new TMessage('info', str_replace('","', '",<br>&nbsp;"', json_encode($param)));
+    public static function onHabilitaDesabilita($param = null)
+{
+    try {
+        $formName = 'form_ConferenciaUsinagemForm';
+
+        $obj = new stdClass();
+
+        if (isset($param['cancelado']) && $param['cancelado'] == 1) 
+        {
+            TDBCombo::enableField($formName, 'motivo_cancelamento_id');
+        } 
+        else 
+        {
+            TDBCombo::disableField($formName, 'motivo_cancelamento_id');
+            $obj->motivo_cancelamento_id = '';
+        }
+
+        TForm::sendData($formName, $obj);
+    } catch (Exception $e) {
+        new TMessage('error', $e->getMessage());
     }
+}
 
     /**
      * Salvar registro
@@ -187,34 +219,50 @@ class ConferenciaUsinagemForm extends TPage
     {
         try {
             $data = $this->form->getData();
+            if((int)$data->cancelado == 1 && (int)$data->motivo_cancelamento_id == 0)
+                throw new Exception(_t("To cancel, please provide a reason for cancellation."));
+
             $this->form->validate();
-
             TTransaction::open('permission');
-
+            $conferencia_usinagem_salvo = ConferenciaUsinagem::where('id <> '.(int)$data->id.' and ordem_servico','=', $data->ordem_servico)->first();
+            if($conferencia_usinagem_salvo)
+                throw new Exception(_t("There is already a conference with this service order, check it!"));
+            
             if((int)$data->id > 0)
             {
                 $object                      = new ConferenciaUsinagem($data->id);
                 $object->alterado_em         = date('Y-m-d');
-                $object->alterou_pessoa_id   = TSession::getValue('userid');
+                $object->alterado_por        = TSession::getValue('userid');
                 $object->alterou_pessoa_nome = SystemUser::find(TSession::getValue('userid'))->name;
             }
             else 
             {
                 $object                     = new ConferenciaUsinagem();
                 $object->criado_em          = date('Y-m-d');
-                $object->criou_pessoa_id    = TSession::getValue('userid');
+                $object->criado_por         = TSession::getValue('userid');
                 $object->criou_pessoa_nome  = SystemUser::find(TSession::getValue('userid'))->name;
             }
-            $object->nome      = $data->nome;
+            $object->data_conferencia       = $data->data_conferencia;
+            $object->ordem_servico          = $data->ordem_servico;
+            $object->insumo_id              = $data->insumo_id;
+            $object->quantidade_total       = $data->quantidade_total;
+            $object->cancelado              = $data->cancelado;
+            $object->motivo_cancelamento_id = $data->motivo_cancelamento_id;
             $object->store();
+
+            //----------------- Detalhamento ------------------
+
+
             TTransaction::close();            
 
             $this->form->setData($object);
             new TMessage('info', _t('Record saved successfully!'));
-
+            self::onHabilitaDesabilita($param);
         } catch (Exception $e) {
             new TMessage('error', $e->getMessage());
             TTransaction::rollback();
+            $this->form->setData($data);
+            self::onHabilitaDesabilita($param);            
         }
     }
 
@@ -247,11 +295,11 @@ class ConferenciaUsinagemForm extends TPage
                     $data->alterado_em          = $object->alterado_em;
                 }
                 $this->form->setData($data);
-                TTransaction::close();
-                
+                TTransaction::close();                
             } else {
                 $this->form->clear(TRUE);
             }
+            self::onHabilitaDesabilita();
         } catch (Exception $e) {
             new TMessage('error', $e->getMessage());
             TTransaction::rollback();
@@ -261,5 +309,6 @@ class ConferenciaUsinagemForm extends TPage
     public function onClear($param)
     {
         $this->form->clear(true);
+        self::onHabilitaDesabilita();
     }
 }

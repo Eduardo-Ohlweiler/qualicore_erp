@@ -569,7 +569,7 @@ CREATE TABLE conferencia_usinagem (
 
 CREATE TABLE conferencia_usinagem (
     id SERIAL PRIMARY KEY,
-    data DATE NOT NULL,
+    data_conferencia DATE NOT NULL,
     ordem_servico INT,
     insumo_id INT REFERENCES insumo(id),
     quantidade_total INT NOT NULL,
@@ -586,7 +586,6 @@ CREATE TABLE conferencia_usinagem (
 CREATE TABLE conferencia_usinagem_detalhamento (
     id SERIAL PRIMARY KEY,
     conferencia_usinagem_id INT NOT NULL REFERENCES conferencia_usinagem(id),
-    data DATE NOT NULL,
     retrabalho INT,
     maquina_id INT REFERENCES maquina(id),
     pessoa_id INT REFERENCES pessoa(id),

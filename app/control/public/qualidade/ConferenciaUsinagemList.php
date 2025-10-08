@@ -177,7 +177,7 @@ class ConferenciaUsinagemList extends TPage
             $data = $this->form->getData();
             TTransaction::open('permission');
 
-            $repository = new TRepository('Insumo');
+            $repository = new TRepository('ConferenciaUsinagem');
             $limit = 10;
             $criteria = new TCriteria;
 

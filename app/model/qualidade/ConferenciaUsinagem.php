@@ -18,7 +18,7 @@ class ConferenciaUsinagem extends TRecord
     {
         parent::__construct($id, $callObjectLoad);
 
-        parent::addAttribute('data');
+        parent::addAttribute('data_conferencia');
         parent::addAttribute('ordem_servico');
         parent::addAttribute('insumo_id');
         parent::addAttribute('quantidade_total');
