@@ -115,10 +115,10 @@ class ConferenciaUsinagemForm extends TPage
         $detalhamento_turno_id->enableSearch();
         $detalhamento_turno_id->setSize('100%');
 
-        $detalhamento_refugo_sim_nao = new TCombo('detalhamento_refugo_sim_nao[]');
-        $detalhamento_refugo_sim_nao->enableSearch();
-        $detalhamento_refugo_sim_nao->addItems(['1'=>'<b>'._t('Yes').'</b>','2'=>'<b>'._t('No').'</b>']);
-        $detalhamento_refugo_sim_nao->setSize('100%');
+        $detalhamento_retrabalho_sim_nao = new TCombo('detalhamento_retrabalho_sim_nao[]');
+        $detalhamento_retrabalho_sim_nao->enableSearch();
+        $detalhamento_retrabalho_sim_nao->addItems(['1'=>'<b>'._t('Yes').'</b>','2'=>'<b>'._t('No').'</b>']);
+        $detalhamento_retrabalho_sim_nao->setSize('100%');
         
         $quantidade_retrabalho = new TEntry('quantidade_retrabalho[]');
         $quantidade_retrabalho->setMask('9999999999');
@@ -146,16 +146,16 @@ class ConferenciaUsinagemForm extends TPage
         $this->fieldlist->generateAria();
         $this->fieldlist->width = '100%';
         $this->fieldlist->name  = 'my_field_list';
-        $this->fieldlist->addField( '<b>'._t('Operator').'</b>',            $detalhamento_pessoa_id,        ['width' => '180'] );        
-        $this->fieldlist->addField( '<b>'._t('Machine').'</b>',             $detalhamento_maquina_id,       ['width' => '150'] );
-        $this->fieldlist->addField( '<b>'._t('Shift').'</b>',               $detalhamento_turno_id,         ['width' => '100'] );        
-        $this->fieldlist->addField( '<b>'._t('Rework quantity').' (*)</b>', $quantidade_retrabalho,         ['width' => '50', 'sum' => true] );
-        $this->fieldlist->addField( '<b>'._t('Amount of scrap').' (*)</b>', $quantidade_refugo,             ['width' => '50', 'sum' => true] );
+        $this->fieldlist->addField( '<b>'._t('Operator').' (*)</b>',            $detalhamento_pessoa_id,        ['width' => '180'] );        
+        $this->fieldlist->addField( '<b>'._t('Machine').' (*)</b>',             $detalhamento_maquina_id,       ['width' => '150'] );
+        $this->fieldlist->addField( '<b>'._t('Shift').' (*)</b>',               $detalhamento_turno_id,         ['width' => '100'] );        
+        $this->fieldlist->addField( '<b>'._t('Rework quantity').' (*)</b>',     $quantidade_retrabalho,         ['width' => '50', 'sum' => true] );
+        $this->fieldlist->addField( '<b>'._t('Amount of scrap').' (*)</b>',     $quantidade_refugo,             ['width' => '50', 'sum' => true] );
 
-        $this->fieldlist->addField( '<b>% Reprovado</b>', $margem_reprovacao, ['width' => '80', 'sum' => true] );
+        $this->fieldlist->addField( '<b>% Reprovado</b>',  $margem_reprovacao, ['width' => '80', 'sum' => true] );
         $this->fieldlist->addField( '<b>% Retrabalho</b>', $margem_retrabalho, ['width' => '80', 'sum' => true] );
 
-        $this->fieldlist->addField( '<b>'._t('Rework').'</b>',              $detalhamento_refugo_sim_nao,           ['width' => '80'] );
+        $this->fieldlist->addField( '<b>'._t('Rework').'</b>',              $detalhamento_retrabalho_sim_nao,           ['width' => '80'] );
         $this->fieldlist->addField( '<b>Detalhamento id</b>',                    $detalhamento_id,               ['width' => '0%', 'uniqid' => true] );
         $this->fieldlist->addField( '<b>Detalhamento id</b>',                    $detalhamento_conferencia_usinagem_id,['width' => '0%'] );
         
@@ -242,17 +242,59 @@ class ConferenciaUsinagemForm extends TPage
                 $object->criado_por         = TSession::getValue('userid');
                 $object->criou_pessoa_nome  = SystemUser::find(TSession::getValue('userid'))->name;
             }
+
             $object->data_conferencia       = $data->data_conferencia;
             $object->ordem_servico          = $data->ordem_servico;
             $object->insumo_id              = $data->insumo_id;
             $object->quantidade_total       = $data->quantidade_total;
-            $object->cancelado              = $data->cancelado;
+            $object->cancelado              = 2;
+            if((int)$data->cancelado > 0)
+                $object->cancelado          = $data->cancelado;
             $object->motivo_cancelamento_id = $data->motivo_cancelamento_id;
             $object->store();
 
             //----------------- Detalhamento ------------------
+            ConferenciaUsinagemDetalhamento::where('conferencia_usinagem_id', '=', $object->id)->delete();
 
+            if ( !empty($param['detalhamento_pessoa_id']) ) 
+            {
+                foreach ($param['detalhamento_pessoa_id'] as $key => $pessoa_id) 
+                {
+                    if (empty($param['detalhamento_pessoa_id'][$key]) || (int)$param['detalhamento_pessoa_id'][$key] == 0)
+                        throw new Exception(_t("Informe o operador."));
+                    if (empty($param['detalhamento_maquina_id'][$key]) || (int)$param['detalhamento_maquina_id'][$key] == 0)
+                        throw new Exception(_t("Informe a máquina."));
+                    if (empty($param['detalhamento_turno_id'][$key]) || (int)$param['detalhamento_turno_id'][$key] == 0)
+                        throw new Exception(_t("Informe o turno."));
+                    if (empty($param['quantidade_retrabalho'][$key]) || (int)$param['quantidade_retrabalho'][$key] == 0)
+                        throw new Exception(_t("Informe a quantidade de retrabalho."));
+                    if (empty($param['quantidade_refugo'][$key]) || (int)$param['quantidade_refugo'][$key] == 0)
+                        throw new Exception(_t("Informe a quantidade de refugo."));
 
+                    $detalhe = new ConferenciaUsinagemDetalhamento;
+                    $detalhe->conferencia_usinagem_id = $object->id;
+                    $detalhe->pessoa_id               = $param['detalhamento_pessoa_id'][$key];
+                    $detalhe->maquina_id              = $param['detalhamento_maquina_id'][$key];
+                    $detalhe->turno_id                = $param['detalhamento_turno_id'][$key];
+                    $detalhe->quantidade_retrabalho   = (int)$param['quantidade_retrabalho'][$key];
+                    $detalhe->quantidade_refugo       = (int)$param['quantidade_refugo'][$key];
+
+                    // Calcula margens
+                    $detalhe->margem_retrabalho = 0;
+                    $detalhe->margem_reprovacao = 0;
+
+                    if((int)$param['quantidade_retrabalho'][$key] > 0)
+                        $detalhe->margem_retrabalho = FuncoesCalculos::calcularMargensRetFloat((int)$param['quantidade_retrabalho'][$key], $object->quantidade_total, 2);
+                    if((int)$param['quantidade_refugo'][$key] > 0)
+                        $detalhe->margem_reprovacao = FuncoesCalculos::calcularMargensRetFloat((int)$param['quantidade_refugo'][$key],     $object->quantidade_total, 2);;
+                        
+
+                    $detalhe->refugo_sim_nao = $param['detalhamento_refugo_sim_nao'][$key] ?? 2;
+                    $detalhe->store();
+                }
+            }
+            
+        
             TTransaction::close();            
 
             $this->form->setData($object);
