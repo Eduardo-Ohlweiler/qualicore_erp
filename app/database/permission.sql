@@ -553,28 +553,12 @@ CREATE TABLE turno (
 -- Tabela: conferencia_usinagem
 CREATE TABLE conferencia_usinagem (
     id SERIAL PRIMARY KEY,
-    data DATE NOT NULL,
+    data_conferencia DATE NOT NULL,
     ordem_servico INT,
     insumo_id INT REFERENCES insumo(id),
     quantidade_total INT NOT NULL,
     quantidade_refugo INT NOT NULL,
     quantidade_retrabalho INT NOT NULL,
-    criado_em DATE NOT NULL,
-    alterado_em DATE,
-    criado_por INT NOT NULL REFERENCES system_users(id),
-    alterado_por INT REFERENCES system_users(id),
-    cancelado INT DEFAULT 0,
-    motivo_cancelamento_id INT REFERENCES motivo_cancelamento(id)
-);
-
-CREATE TABLE conferencia_usinagem (
-    id SERIAL PRIMARY KEY,
-    data_conferencia DATE NOT NULL,
-    ordem_servico INT,
-    insumo_id INT REFERENCES insumo(id),
-    quantidade_total INT NOT NULL,
-    quantidade_refugo INT,
-    quantidade_retrabalho INT,
     criado_em DATE NOT NULL,
     alterado_em DATE,
     criado_por INT NOT NULL REFERENCES system_users(id),

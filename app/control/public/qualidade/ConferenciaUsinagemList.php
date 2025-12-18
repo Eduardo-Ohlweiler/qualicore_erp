@@ -34,42 +34,66 @@ class ConferenciaUsinagemList extends TPage
     {
         parent::__construct();
 
-        $this->form = new BootstrapFormBuilder('form_search_Insumo');
-        $this->form->setFormTitle(_t('Inputs'));
+        $this->form = new BootstrapFormBuilder('form_search_ConferenciaUsinagem');
+        $this->form->setFormTitle(_t('Machining Conference'));
 
         $id             = new TEntry('id');
-        //$decricao       = new TEntry('descricao');
-        //$codigo         = new TEntry('codigo');
-        //$tipo_insumo_id = new TDBCombo('tipo_insumo_id', 'permission', 'TipoInsumo', 'id', 'nome');
+        $insumo_id      = new TDBUniqueSearch('insumo_id', 'permission', 'Insumo', 'id', 'descricao');
+        $codigo         = new TEntry('codigo');
+        $data1          = new TDate('data1');
+        $data2          = new TDate('data2');
+        $ordem_servico  = new TEntry('ordem_servico');
 
         $id->setSize('80');
-        //$decricao->setSize('250');
-        //$codigo->setSize('250');
-        //$tipo_insumo_id->setSize('250');
+        $insumo_id->setSize('80%');
+        $codigo->setSize('200');
+        $data1->setSize('150');
+        $data2->setSize('150');
+        $ordem_servico->setSize('200');
 
         $id->setMask('99 9999');
+        $data1->setMask('dd/mm/yyyy');
+        $data2->setMask('dd/mm/yyyy');
 
         $this->form->addFields( [new TLabel(_t('ID'))],          [$id]);
-        //$this->form->addFields( [new TLabel(_t('Drawing code'))],[$codigo] );
-        //$this->form->addFields( [new TLabel(_t('Description'))], [$decricao] );
-        //$this->form->addFields( [new TLabel(_t('Input type'))],  [$tipo_insumo_id] );
+        $this->form->addFields( [new TLabel(_t('Date'))],[$data1, $data2]);
+        $this->form->addFields( [new TLabel(_t('Description'))], [$insumo_id]);
+        $this->form->addFields( [new TLabel(_t('Drawing code'))],[$codigo]);
+        $this->form->addFields( [new TLabel(_t('Service order'))],[$ordem_servico]);
+
 
         $this->form->addAction(_t('Search'),   new TAction([$this, 'onSearch']), 'fa:search blue');
         $this->form->addAction(_t('Clear'),    new TAction([$this, 'onClear']),  'fa:eraser blue');
         $this->form->addAction(_t('New'),      new TAction([$this, 'onNew']),    'fa:plus green');
+        $this->form->addAction(_('CSV'),      new TAction([$this, 'onCsv']),    'fa:table blue');
 
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->datagrid->style = 'width: 100%';
 
-        $col_id          = new TDataGridColumn('id',               _t('ID'),          'center',   '5%');
-        //$col_codigo      = new TDataGridColumn('codigo',           _t('Drawing code'),        'left',     '20%');
-        //$col_descricao   = new TDataGridColumn('descricao',        _t('Description'), 'left',     '20%');
-        //$col_tipo_insumo = new TDataGridColumn('tipo_insumo->nome', _t('Input type'),  'left',     '20%');
+        $col_id                     = new TDataGridColumn('id',                    _t('ID'),   'center', '5%');
+        $col_data_conferencia       = new TDataGridColumn('data_conferencia',      _t('Date'), 'left',  '6%');
+        $col_ordem_servico          = new TDataGridColumn('ordem_servico',         _('Ordem de serviço'), 'right',  '10%');
+        $col_insumo_id              = new TDataGridColumn('insumo_descricao_id_cod_desenho',   _('Insumo'), 'left',  '30%');
+        $col_quantidade_total       = new TDataGridColumn('quantidade_total',      _('Quantidade total'), 'right',  '8%');
+        $col_quantidade_refugo      = new TDataGridColumn('quantidade_refugo',     _('Quantidade de refugo'), 'right',  '8%');
+        $col_quantidade_retrabalho  = new TDataGridColumn('quantidade_retrabalho', _('Quantidade de retrabalho'), 'right',  '7%');
+        $col_margem_retrabalho      = new TDataGridColumn('margem_retrabalho',     _('% Retrabalho'),        'right',     '7%');
+        $col_margem_refugo          = new TDataGridColumn('margem_refugo',         _('% Refugo'),        'right',     '7%');
+        $col_margem_rejeicao        = new TDataGridColumn('margem_rejeicao',       _('% Rejeição'),        'right',     '7%');
 
-        $col_bloqueado   = new TDataGridColumn('bloqueado_icon',  _t('Blocked'),  'left',     '15%');
+        $col_bloqueado   = new TDataGridColumn('bloqueado_icon',  _t('Canceled'),  'left',     '5%');
         $col_bloqueado->setTransformer(function($value){return $value;});
 
         $this->datagrid->addColumn($col_id);
+        $this->datagrid->addColumn($col_data_conferencia);
+        $this->datagrid->addColumn($col_ordem_servico);
+        $this->datagrid->addColumn($col_insumo_id);
+        $this->datagrid->addColumn($col_quantidade_total);
+        $this->datagrid->addColumn($col_quantidade_refugo);
+        $this->datagrid->addColumn($col_quantidade_retrabalho);
+        $this->datagrid->addColumn($col_margem_retrabalho);
+        $this->datagrid->addColumn($col_margem_refugo);
+        $this->datagrid->addColumn($col_margem_rejeicao);
         $this->datagrid->addColumn($col_bloqueado);
 
         $action1 = new TDataGridAction([$this, 'onEdit'],     ['key' => '{id}'] );
@@ -82,8 +106,7 @@ class ConferenciaUsinagemList extends TPage
 
         $action_group = new TDataGridActionGroup('Ação ', 'fa:th blue');
         $action_group->addAction($action1);
-        $action_group->addAction($action2);
-        
+
         $this->datagrid->addActionGroup($action_group);
 
         $this->datagrid->createModel();
@@ -101,13 +124,73 @@ class ConferenciaUsinagemList extends TPage
         parent::add($vbox);
     }
 
+    public function onCsv($param)
+    {
+        try
+        {
+            $data = $this->datagrid->getOutputData();
+
+            if (!$data)
+            {
+                new TMessage('info', 'Nenhum dado para exportar');
+                return;
+            }
+
+            $dir  = '/var/www/html/qualicore_erp/app/output';
+            $timestamp = date('Ymd_His'); // exemplo: 20251217_211530
+            $file = $dir . "/conferencia_usinagem_{$timestamp}.csv";
+
+            if (!is_dir($dir) || !is_writable($dir)) {
+                throw new Exception('Diretório de exportação não existe ou não tem permissão');
+            }
+
+            $handler = fopen($file, 'w');
+            if (!$handler) {
+                throw new Exception('Não foi possível criar o arquivo CSV');
+            }
+
+            // cabeçalho
+            fputcsv($handler, array_keys((array) $data[0]), ';');
+
+            foreach ($data as $row)
+            {
+                $row = (array) $row;
+
+                if (!empty($row['data_conferencia'])) {
+                    $row['data_conferencia'] = TDate::date2br($row['data_conferencia']);
+                }
+
+                fputcsv($handler, $row, ';');
+            }
+
+            fclose($handler);
+
+            parent::openFile($file);
+        }
+        catch (Exception $e)
+        {
+            new TMessage('error', $e->getMessage());
+        }
+    }
+
+
+
     public function onClear($param)
     {
-        TSession::setValue('InsumoList_filter', null);
-        TSession::setValue('InsumoList_data',   null);
-        
+        $data = $this->form->getData();
+        TSession::setValue('ConferenciaUsinagemList_filter', null);
+        TSession::setValue('ConferenciaUsinagemList_data',   null);
+
+        $data->id               = '';
+        $data->insumo_id        = '';
+        $data->codigo           = '';
+        $data->data1            = '';
+        $data->data2            = '';
+        $data->ordem_servico    = '';
+
         $this->form->clear(true);
         $this->onReload();
+        $this->form->setData($data);
     }
 
     public function onSearch()
@@ -119,13 +202,42 @@ class ConferenciaUsinagemList extends TPage
             $criteria->add(new TFilter('id', '=', $data->id));
         if (!empty($data->descricao)) 
             $criteria->add(new TFilter('descricao', 'ILIKE', "%{$data->descricao}%"));
-        if ((int)$data->tipo_insumo_id > 0) 
-            $criteria->add(new TFilter('tipo_insumo_id', '=', $data->tipo_insumo_id));
-        if (!empty($data->codigo)) 
-            $criteria->add(new TFilter('codigo', 'ILIKE', "%{$data->codigo}%"));
+        if ((int)$data->insumo_id > 0)
+            $criteria->add(new TFilter('insumo_id', '=', $data->insumo_id));
+        if (!empty($data->codigo))
+        {
+            $criteria->add(new TFilter(
+                'insumo_id',
+                'IN',
+                "(SELECT id FROM insumo WHERE codigo ILIKE '%{$data->codigo}%')"
+            ));
+        }
 
-        TSession::setValue('InsumoList_filter', $criteria);
-        TSession::setValue('InsumoList_data', $data);
+        if( !empty($data->data1) || !empty($data->data2))
+        {
+            if(!empty($data->data1))
+            {
+                $criteria->add(new TFilter('data_conferencia', '>=', $data->data1));
+            }
+            if(!empty($data->data2))
+            {
+                $criteria->add(new TFilter('data_conferencia', '<=', $data->data2));
+            }
+        }
+
+        if (!empty($data->ordem_servico))
+        {
+            $criteria->add(
+                new TFilter(
+                    'CAST(ordem_servico AS TEXT)',
+                    'ILIKE',
+                    "%{$data->ordem_servico}%"
+                )
+            );
+        }
+
+        TSession::setValue('ConferenciaUsinagemList_filter', $criteria);
+        TSession::setValue('ConferenciaUsinagemList_data', $data);
         $this->onReload();
 
         $this->form->setData($data);
@@ -154,15 +266,15 @@ class ConferenciaUsinagemList extends TPage
         {
             TTransaction::open('permission');
 
-            $insumo = new Insumo($param['id']);
-            if($insumo)
+            $conferencia_usinagem = new ConferenciaUsinagem($param['id']);
+            if($conferencia_usinagem)
             {   
-                if($insumo->bloqueado == 2)
-                    $insumo->bloqueado = 1;
-                elseif($insumo->bloqueado == 1)
-                    $insumo->bloqueado = 2;
-                
-                $insumo->save();
+                if($conferencia_usinagem->cancelado != 1)
+                    $conferencia_usinagem->cancelado = 1;
+                elseif($conferencia_usinagem->cancelado == 1)
+                    $conferencia_usinagem->cancelado = 2;
+
+                $conferencia_usinagem->save();
             }
 
             TTransaction::close();
@@ -181,10 +293,10 @@ class ConferenciaUsinagemList extends TPage
             $limit = 10;
             $criteria = new TCriteria;
 
-            if (TSession::getValue('InsumoList_filter'))
-                $criteria = TSession::getValue('InsumoList_filter');
-            if (TSession::getValue('InsumoList_data'))
-                $data = TSession::getValue('InsumoList_data');
+            if (TSession::getValue('ConferenciaUsinagemList_filter'))
+                $criteria = TSession::getValue('ConferenciaUsinagemList_filter');
+            if (TSession::getValue('ConferenciaUsinagemList_data'))
+                $data = TSession::getValue('ConferenciaUsinagemList_data');
 
             $criteria->setProperty('limit', $limit);
             $criteria->setProperty('offset', (isset($param['offset'])) ? (int) $param['offset'] : 0);
@@ -197,6 +309,13 @@ class ConferenciaUsinagemList extends TPage
             {
                 foreach ($objects as $object)
                 {
+                    $margem_refugo      = FuncoesCalculos::calcularMargensRetFloat($object->quantidade_total, $object->quantidade_refugo, 2);
+                    $margem_retrabalho  = FuncoesCalculos::calcularMargensRetFloat($object->quantidade_total, $object->quantidade_refugo, 2);
+                    $margem_rejeicao    = $margem_refugo + $margem_retrabalho;
+                    $object->margem_refugo = $margem_retrabalho.' %';
+                    $object->margem_retrabalho = $margem_refugo.' %';
+                    $object->margem_rejeicao = $margem_rejeicao.' %';
+                    $object->data_conferencia = TDate::date2br($object->data_conferencia);
                     $this->datagrid->addItem($object);
                 }
             }
@@ -222,7 +341,7 @@ class ConferenciaUsinagemList extends TPage
     public function onEdit($param)
     {
         $key = $param['id'];
-        TApplication::loadPage('InsumoForm', 'onEdit', ['key' => $key]);
+        TApplication::loadPage('ConferenciaUsinagemForm', 'onEdit', ['key' => $key]);
     }
 
     public function show()

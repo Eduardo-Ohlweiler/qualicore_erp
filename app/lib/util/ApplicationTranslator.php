@@ -28,6 +28,18 @@ class ApplicationTranslator
         $this->messages['pt'] = [];
         $this->messages['es'] = [];
 
+        $this->messages['en'][] = 'Drawing code';
+        $this->messages['pt'][] = 'Código desenho';
+        $this->messages['es'][] = 'Código de dibujo';
+
+        $this->messages['en'][] = 'Code';
+        $this->messages['pt'][] = 'Código';
+        $this->messages['es'][] = 'Código';
+
+        $this->messages['en'][] = 'Canceled';
+        $this->messages['pt'][] = 'Cancelado';
+        $this->messages['es'][] = 'Cancelado';
+
         $this->messages['en'][] = 'There is already a conference with this service order, check it!';
         $this->messages['pt'][] = 'Já existe uma conferência com esta ordem de serviço, verifique!';
         $this->messages['es'][] = 'Ya existe una conferencia con esta orden de servicio, ¡consúltela!';
@@ -35,6 +47,10 @@ class ApplicationTranslator
         $this->messages['en'][] = 'To cancel, please provide a reason for cancellation.';
         $this->messages['pt'][] = 'Para cancelar informe um motivo de cancelamento.';
         $this->messages['es'][] = 'Para cancelar, proporcione un motivo de cancelación.';
+
+        $this->messages['en'][] = 'Conference';
+        $this->messages['pt'][] = 'Conferência';
+        $this->messages['es'][] = 'Conferencia';
 
         $this->messages['en'][] = 'Service order';
         $this->messages['pt'][] = 'Ordem de serviço';

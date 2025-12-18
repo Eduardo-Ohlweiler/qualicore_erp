@@ -39,6 +39,16 @@ class ConferenciaUsinagem extends TRecord
         return $this->insumo;
     }
 
+    public function get_insumo_descricao_id_cod_desenho()
+    {
+        return $this->get_insumo_descricao().' ('.$this->insumo_id.') ('.$this->get_insumo()->codigo.')';
+    }
+
+    public function get_insumo_descricao()
+    {
+        return $this->get_insumo()->descricao;
+    }
+
     public function get_criado_por_usuario()
     {
         if (empty($this->criado_por_usuario))
