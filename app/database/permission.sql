@@ -553,7 +553,6 @@ CREATE TABLE turno (
 -- Tabela: conferencia_usinagem
 CREATE TABLE conferencia_usinagem (
     id SERIAL PRIMARY KEY,
-    data_conferencia DATE NOT NULL,
     ordem_servico INT,
     insumo_id INT REFERENCES insumo(id),
     quantidade_total INT NOT NULL,
@@ -576,6 +575,10 @@ CREATE TABLE conferencia_usinagem_detalhamento (
     turno_id INT REFERENCES turno(id),
     quantidade_retrabalho INT NOT NULL,
     quantidade_refugo INT NOT NULL,
-    obs TEXT
+    obs TEXT,
+    criado_em DATE NOT NULL,
+    alterado_em DATE,
+    criado_por INT NOT NULL REFERENCES system_users(id),
+    alterado_por INT REFERENCES system_users(id)
 );
 

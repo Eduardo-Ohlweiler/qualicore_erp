@@ -71,7 +71,7 @@ class ConferenciaUsinagemList extends TPage
         $this->datagrid->style = 'width: 100%';
 
         $col_id                     = new TDataGridColumn('id',                    _t('ID'),   'center', '5%');
-        $col_data_conferencia       = new TDataGridColumn('data_conferencia',      _t('Date'), 'left',  '6%');
+        $col_data_conferencia       = new TDataGridColumn('criado_em',      _t('Date'), 'left',  '6%');
         $col_ordem_servico          = new TDataGridColumn('ordem_servico',         _('Ordem de serviço'), 'right',  '10%');
         $col_insumo_id              = new TDataGridColumn('insumo_descricao_id_cod_desenho',   _('Insumo'), 'left',  '30%');
         $col_quantidade_total       = new TDataGridColumn('quantidade_total',      _('Quantidade total'), 'right',  '8%');
@@ -217,11 +217,13 @@ class ConferenciaUsinagemList extends TPage
         {
             if(!empty($data->data1))
             {
-                $criteria->add(new TFilter('data_conferencia', '>=', $data->data1));
+                $criteria->add(new TFilter('', 'exists', "(SELECT null FROM conferencia_usinagem_detalhamento cud
+                                                                                    WHERE criado_em >= ".$data->data1." and cud.conferencia_usinagem_id = conferencia_usinagem.id)"));
             }
             if(!empty($data->data2))
             {
-                $criteria->add(new TFilter('data_conferencia', '<=', $data->data2));
+                $criteria->add(new TFilter('', 'exists', "(SELECT null FROM conferencia_usinagem_detalhamento cud
+                                                                                    WHERE criado_em <= ".$data->data2." and cud.conferencia_usinagem_id = conferencia_usinagem.id)"));
             }
         }
 

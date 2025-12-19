@@ -25,12 +25,12 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
 //        $this->setLimit(-1); // turn off limit for datagrid
 
         // create the form
-        $this->form = new BootstrapFormBuilder('form_ConferenciaUsinagemForm');
+        $this->form = new BootstrapFormBuilder('form_ConferenciaUsinagemDetalhamentoForm');
         $this->form->setFormTitle(_t('Machining Conference'));
 
         // create the form fields
         $id     = new TEntry('id');
-        $retrabalho = new TCombo('bloqueado');
+        $retrabalho = new TCombo('retrabalho');
         $retrabalho->addItems([
             1 => _t('Yes'),
             2 => _t('No')
@@ -112,6 +112,91 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         $alterado_em->setMask('dd/mm/yyyy');
         $alterado_em->setDatabaseMask('yyyy-mm-dd');
 
+        //========================================================================
+        //========================================================================
+        //FORM PRINCIPAL
+        $this->principal_form = new BootstrapFormBuilder('form_ConferenciaUsinagemDetalhamentoForm');
+        $this->principal_form->setFormTitle(_t('Machining Conference'));
+
+        // create the form fields
+        $principal_id           = new TEntry('principal_id');
+        $ordem_servico          = new TEntry('ordem_servico');
+        $cancelado              = new TCombo('cancelado');
+        $cancelado->addItems([
+            1 => _t('Yes'),
+            2 => _t('No')
+        ]);
+
+        $insumo_id                      = new TDBCombo('insumo_id', 'permission', 'Insumo', 'id', 'nome');
+        $quantidade_total               = new TEntry('quantidade_total');
+        $quantidade_total_refugo        = new TEntry('quantidade_total_refugo');
+        $quantidade_total_retrabalho    = new TEntry('quantidade_total_retrabalho');
+        $margem_total_retrabalho        = new TEntry('margem_total_retrabalho');
+        $margem_total_refugo            = new TEntry('margem_total_refugo');
+        $margem_total_reprovado         = new TEntry('margem_total_reprovado');
+
+        $principal_criou_pessoa_id      = new TEntry('principal_criou_pessoa_id');
+        $principal_criou_pessoa_nome    = new TEntry('principal_criou_pessoa_nome');
+        $principal_alterou_pessoa_id    = new TEntry('principal_alterou_pessoa_id');
+        $principal_alterou_pessoa_nome  = new TEntry('principal_alterou_pessoa_nome');
+        $principal_criado_em            = new TDate('principal_criado_em');
+        $principal_alterado_em          = new TDate('principal_alterado_em');
+
+        // add the form fields
+        $this->principal_form->addFields( [new TLabel('ID')],                             [$principal_id] );
+        $this->principal_form->addFields( [new TLabel('Insumo')],                         [$insumo_id] );
+        $this->principal_form->addFields( [new TLabel('Ordem de serviço')],               [$ordem_servico] );
+        $this->principal_form->addFields( [new TLabel('Quantidade total')],               [$quantidade_total] );
+        $this->principal_form->addFields( [new TLabel('Quantidade total de retrabalho')], [$quantidade_total_retrabalho] );
+        $this->principal_form->addFields( [new TLabel('Quantidade total de refugo')],     [$quantidade_total_refugo] );
+        $this->principal_form->addFields( [new TLabel('% Total retrabalho')],             [$margem_total_retrabalho] );
+        $this->principal_form->addFields( [new TLabel('% Total refugo')],                 [$margem_total_refugo] );
+        $this->principal_form->addFields( [new TLabel('% Total reprovado')],              [$margem_total_reprovado] );
+
+        $this->principal_form->addFields([new TLabel('Criado')],    [$principal_criou_pessoa_id,      $principal_criou_pessoa_nome,     $principal_criado_em]);
+        $this->principal_form->addFields([new TLabel('Alterado')],  [$principal_alterou_pessoa_id,    $principal_alterou_pessoa_nome,   $principal_alterado_em]);
+
+        $principal_id->setSize('80');
+        $cancelado->setSize('100');
+        $insumo_id->setSize('80%');
+        $ordem_servico->setSize('150');
+        $quantidade_total->setSize('150');
+        $quantidade_total_retrabalho->setSize('150');
+        $quantidade_total_refugo->setSize('150');
+        $margem_total_retrabalho->setSize('150');
+        $margem_total_refugo->setSize('150');
+        $margem_total_reprovado->setSize('150');
+        $principal_criou_pessoa_id->setSize('80');
+        $principal_criou_pessoa_nome->setSize('300');
+        $principal_alterou_pessoa_id->setSize('80');
+        $principal_alterou_pessoa_nome->setSize('300');
+
+        $quantidade_total->addValidation(_('Quantidade total'), new TRequiredValidator());
+        $insumo_id->addValidation(_('Insumo'), new TRequiredValidator());
+
+
+        // define the form actions
+        $this->principal_form->addAction( 'Save', new TAction([$this, 'onSavePrincipal']), 'fa:save green');
+
+        // make id not editable
+        $principal_id->setEditable(FALSE);
+        $quantidade_total_retrabalho->setEditable(FALSE);
+        $quantidade_total_refugo->setEditable(FALSE);
+        $margem_total_retrabalho->setEditable(FALSE);
+        $margem_total_refugo->setEditable(FALSE);
+        $margem_total_reprovado->setEditable(FALSE);
+        $principal_criou_pessoa_id->setEditable(FALSE);
+        $principal_criou_pessoa_nome->setEditable(FALSE);
+        $principal_alterou_pessoa_id->setEditable(FALSE);
+        $principal_alterou_pessoa_nome->setEditable(FALSE);
+        $principal_criado_em->setEditable(FALSE);
+        $principal_alterado_em->setEditable(FALSE);
+
+        $principal_criado_em->setMask('dd/mm/yyyy');
+        $principal_criado_em->setDatabaseMask('yyyy-mm-dd');
+        $principal_alterado_em->setMask('dd/mm/yyyy');
+        $principal_alterado_em->setDatabaseMask('yyyy-mm-dd');
+
         // create the datagrid
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->datagrid->width = '100%';
@@ -141,8 +226,8 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         $vbox->style = 'width: 100%';
 //        $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
 
-//        $vbox->add($this->form);
-        $vbox->add($panel = TPanelGroup::pack('', $this->datagrid));
+        $vbox->add($this->principal_form);
+//        $vbox->add($panel = TPanelGroup::pack('', $this->datagrid));
         $vbox->add($panel = TPanelGroup::pack('', $this->datagrid));
 
 
@@ -160,6 +245,49 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
 
         // pack the table inside the page
         parent::add($vbox);
+    }
+
+    public function onSavePrincipal()
+    {
+        $this->principal_form->validate();
+        $data = $this->principal_form->getData();
+
+        $conferencia_usinagem_salva = ConferenciaUsinagem::where("ordem_servico = ".$data->ordem_servico." and id ",'<>', $data->principal_id)->first();
+        if($conferencia_usinagem_salva)
+            throw new Exception(_('Já existe um registro para essa ordem de serviço, verifique!'));
+
+        if((int)$data->principal_id > 0)
+        {
+            $object = new ConferenciaUsinagem($data->principal_id);
+            $object->alterado_em       = date('Y-m-d');
+            $object->alterou_pessoa_id = TSession::getValue('userid');
+
+            $object->alterou_pessoa_nome = SystemUser::find(TSession::getValue('userid'))->name;
+        }
+        else
+        {
+            $object = new ConferenciaUsinagem();
+            $object->criado_em       = date('Y-m-d');
+            $object->criou_pessoa_id = TSession::getValue('userid');
+            $object->criou_pessoa_nome = SystemUser::find(TSession::getValue('userid'))->name;
+        }
+
+        $object->ordem_servico = $data->ordem_servico;
+//
+//cancelado
+//insumo_id
+//quantidade_total
+//quantidade_total_refugo
+//quantidade_total_retrabalho
+//margem_total_retrabalho
+//margem_total_refugo
+//margem_total_reprovado
+//principal_criou_pessoa_id
+//principal_criou_pessoa_nome
+//principal_alterou_pessoa_id
+//principal_alterou_pessoa_nome
+//principal_criado_em
+//principal_alterado_em
     }
 
     /**

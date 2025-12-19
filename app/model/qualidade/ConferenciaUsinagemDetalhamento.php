@@ -25,6 +25,24 @@ class ConferenciaUsinagemDetalhamento extends TRecord
         parent::addAttribute('quantidade_retrabalho');
         parent::addAttribute('quantidade_refugo');
         parent::addAttribute('obs');
+        parent::addAttribute('criado_em');
+        parent::addAttribute('alterado_em');
+        parent::addAttribute('criado_por');
+        parent::addAttribute('alterado_por');
+    }
+
+    public function get_criado_por_usuario()
+    {
+        if (empty($this->criado_por_usuario))
+            $this->criado_por_usuario = new SystemUser($this->criado_por);
+        return $this->criado_por_usuario;
+    }
+
+    public function get_alterado_por_usuario()
+    {
+        if (empty($this->alterado_por_usuario))
+            $this->alterado_por_usuario = new SystemUser($this->alterado_por);
+        return $this->alterado_por_usuario;
     }
 
     public function get_conferencia_usinagem()
