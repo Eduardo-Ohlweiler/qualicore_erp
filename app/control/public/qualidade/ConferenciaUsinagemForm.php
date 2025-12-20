@@ -304,8 +304,12 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
             {
                 TTransaction::open('permission');
 
-                $quantidade_total_retrabalho = ConferenciaUsinagemDetalhamento::where('conferencia_usinagem_id', '=', $param['principal_id'])->sum('quantidade_retrabalho');
-                $quantidade_total_refugo     = ConferenciaUsinagemDetalhamento::where('conferencia_usinagem_id', '=', $param['principal_id'])->sum('quantidade_refugo');
+                $conferencia_usinagem_detalhes = ConferenciaUsinagemDetalhamento::where('conferencia_usinagem_id', '=', (int)$param['principal_id'])->load();
+                foreach ($conferencia_usinagem_detalhes as $detalle)
+                {
+                    $quantidade_total_retrabalho += (float)$detalle->quantidade_retrabalho;
+                    $quantidade_total_refugo     += (float)$detalle->quantidade_refugo;
+                }
 
                 TTransaction::close();
                 if ((int)$quantidade_total_retrabalho > 0)
@@ -371,6 +375,9 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
             $object->cancelado              = (int)$data->cancelado;
             $object->insumo_id              = (int)$data->insumo_id;
 
+            if((int)$data->cancelado == 1)
+                $object->motivo_cancelamento_id = (int)$data->motivo_cancelamento_id;
+
             $object->store();
 
             TTransaction::close();
@@ -435,7 +442,51 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
 
     public function onEdit($param)
     {
-        
+        try {
+            if (isset($param['key'])) 
+            {
+                $data = $this->form->getData();
+                $key = $param['key'];
+
+                TTransaction::open('permission');
+                $object = new ConferenciaUsinagem($key);
+
+                $data->principal_id                 = $key;
+                $data->ordem_servico                = $object->ordem_servico;
+                $data->insumo_id                    = $object->insumo_id;
+                $data->quantidade_total             = $object->quantidade_total;
+                $data->quantidade_total_retrabalho  = $object->quantidade_retrabalho;
+                $data->quantidade_total_refugo      = $object->quantidade_total_refugo;
+                $data->cancelado                    = $object->cancelado;
+                $data->motivo_cancelamento_id       = $object->motivo_cancelamento_id;
+
+                if((int)$object->criado_por > 0)
+                {
+                    $data->principal_criou_pessoa_id   = $object->criado_por;
+                    $data->principal_criou_pessoa_nome = SystemUser::find($object->criado_por)->name;
+                    $data->principal_criado_em         = $object->criado_em;
+                }
+                if((int)$object->alterado_por > 0)
+                {
+                    $data->principal_alterou_pessoa_id   = $object->alterado_por;
+                    $data->principal_alterou_pessoa_nome = SystemUser::find($object->alterado_por)->name;
+                    $data->principal_alterado_em         = $object->alterado_em;
+                }
+                $this->principal_form->setData($data);
+                TTransaction::close();
+
+                $param['principal_id']      = $key;
+                $param['quantidade_total']  = $data->quantidade_total;
+                
+                self::onCalculaTotais($param);                
+            } else {
+                $this->form->clear(TRUE);
+            }
+            self::onHabilitaDesabilita($param);
+        } catch (Exception $e) {
+            new TMessage('error', $e->getMessage());
+            TTransaction::rollback();
+        }
     }
 
     public static function onHabilitaDesabilita($param = null)
