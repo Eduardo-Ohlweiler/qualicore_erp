@@ -6,23 +6,12 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
 {
     protected $form;      // form
     protected $datagrid;  // datagrid
-    protected $loaded;
+    protected $loaded = false;
     protected $pageNavigation;  // pagination component
 
-    use Adianti\Base\AdiantiStandardFormListTrait;
-
-    /**
-     * Class constructor
-     * Creates the page, the form and the listing
-     */
     public function __construct()
     {
         parent::__construct();
-
-//        $this->setDatabase('permission'); // define the database
-//        $this->setActiveRecord('ConferenciaUsinagemDetalhamento'); // define the Active Record
-//        $this->setDefaultOrder('id', 'asc'); // define the default order
-//        $this->setLimit(-1); // turn off limit for datagrid
 
         // create the form
         $this->form = new BootstrapFormBuilder('form_ConferenciaUsinagemDetalhamentoForm');
@@ -115,20 +104,24 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         //========================================================================
         //========================================================================
         //FORM PRINCIPAL
-        $this->principal_form = new BootstrapFormBuilder('form_ConferenciaUsinagemDetalhamentoForm');
+        $this->principal_form = new BootstrapFormBuilder('form_PrincipalConferenciaUsinagemDetalhamentoForm');
         $this->principal_form->setFormTitle(_t('Machining Conference'));
 
         // create the form fields
         $principal_id           = new TEntry('principal_id');
         $ordem_servico          = new TEntry('ordem_servico');
-        $cancelado              = new TCombo('cancelado');
+        $cancelado      = new TCombo('cancelado');
+        $cancelado->setChangeAction(new TAction([$this, 'onHabilitaDesabilita']));
         $cancelado->addItems([
             1 => _t('Yes'),
             2 => _t('No')
         ]);
 
-        $insumo_id                      = new TDBCombo('insumo_id', 'permission', 'Insumo', 'id', 'nome');
+        $motivo_cancelamento_id = new TDBCombo('motivo_cancelamento_id', 'permission', 'MotivoCancelamento', 'id', 'motivo');
+
+        $insumo_id                      = new TDBCombo('insumo_id', 'permission', 'Insumo', 'id', 'descricao', 'descricao asc');
         $quantidade_total               = new TEntry('quantidade_total');
+        $quantidade_total->setExitAction(new TAction([$this, 'onCalculaTotais']));
         $quantidade_total_refugo        = new TEntry('quantidade_total_refugo');
         $quantidade_total_retrabalho    = new TEntry('quantidade_total_retrabalho');
         $margem_total_retrabalho        = new TEntry('margem_total_retrabalho');
@@ -156,6 +149,9 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         $this->principal_form->addFields([new TLabel('Criado')],    [$principal_criou_pessoa_id,      $principal_criou_pessoa_nome,     $principal_criado_em]);
         $this->principal_form->addFields([new TLabel('Alterado')],  [$principal_alterou_pessoa_id,    $principal_alterou_pessoa_nome,   $principal_alterado_em]);
 
+        $this->principal_form->addFields([new TLabel(_t('Canceled'))],                [$cancelado]);
+        $this->principal_form->addFields([new TLabel(_t('Reason for cancellation'))], [$motivo_cancelamento_id]);
+
         $principal_id->setSize('80');
         $cancelado->setSize('100');
         $insumo_id->setSize('80%');
@@ -170,6 +166,8 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         $principal_criou_pessoa_nome->setSize('300');
         $principal_alterou_pessoa_id->setSize('80');
         $principal_alterou_pessoa_nome->setSize('300');
+        $motivo_cancelamento_id->setSize('80%');
+        $cancelado->setSize('100');
 
         $quantidade_total->addValidation(_('Quantidade total'), new TRequiredValidator());
         $insumo_id->addValidation(_('Insumo'), new TRequiredValidator());
@@ -196,6 +194,7 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         $principal_criado_em->setDatabaseMask('yyyy-mm-dd');
         $principal_alterado_em->setMask('dd/mm/yyyy');
         $principal_alterado_em->setDatabaseMask('yyyy-mm-dd');
+        @$ordem_servico->setMask('999999999999');
 
         // create the datagrid
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
@@ -208,8 +207,8 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         $this->datagrid->addColumn($col_id);
         $this->datagrid->addColumn($col_name);
 
-        $col_id->setAction( new TAction([$this, 'onReload']),   ['order' => 'id']);
-        $col_name->setAction( new TAction([$this, 'onReload']), ['order' => 'name']);
+//        $col_id->setAction( new TAction([$this, 'onReload']),   ['order' => 'id']);
+//        $col_name->setAction( new TAction([$this, 'onReload']), ['order' => 'name']);
 
         // define row actions
         $action1 = new TDataGridAction([$this, 'onEditCurtain'],   ['key' => '{id}'] );
@@ -241,53 +240,157 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         $this->datagrid->enableSearch($input_search, 'id, name');
         $panel->addHeaderWidget($input_search);
 
-        $panel->addHeaderActionLink(_t('New'), new TAction([$this, 'onEditCurtain']), 'fa:plus green');
+        $action = new TAction([$this, 'onEditCurtain']);
+        $action->setParameter('principal_id', "{principal_id}");
+        $panel->addHeaderActionLink(_t('New'), $action, 'fa:plus green');
 
         // pack the table inside the page
         parent::add($vbox);
     }
 
-    public function onSavePrincipal()
+    public function onDelete($param)
+    {
+
+    }
+
+    public function onSave ($param)
+    {
+
+    }
+
+    public function onReload($param = null)
+    {
+        TTransaction::open('permission');
+
+        $criteria = new TCriteria;
+        $criteria->add(new TFilter('conferencia_usinagem_id', '=', $param['principal_id']));
+
+        $repo = new TRepository('ConferenciaUsinagemDetalhamento');
+        $objects = $repo->load($criteria);
+
+        $this->datagrid->clear();
+        foreach ($objects as $obj)
+        {
+            $this->datagrid->addItem($obj);
+        }
+
+        TTransaction::close();
+        $this->loaded = true;
+    }
+
+    public static function onCalculaTotais($param)
+    {
+        try
+        {
+            $obj = new stdClass();
+
+            $quantidade_total = 0;
+            if((int)$param['quantidade_total'] > 0)
+                $quantidade_total = $param['quantidade_total'];
+            
+            $quantidade_total_retrabalho    = 0;
+            $quantidade_total_refugo        = 0;
+
+            $margem_total_retrabalho        = 0;
+            $margem_total_refugo            = 0;
+            $margem_total_reprovado         = 0;
+
+            $obj->quantidade_total_retrabalho = 0;
+            $obj->margem_total_retrabalho = 0;
+            $obj->quantidade_total_refugo = 0;
+            $obj->margem_total_refugo = 0;
+
+            if((int)$param['principal_id'] > 0)
+            {
+                TTransaction::open('permission');
+
+                $quantidade_total_retrabalho = ConferenciaUsinagemDetalhamento::where('conferencia_usinagem_id', '=', $param['principal_id'])->sum('quantidade_retrabalho');
+                $quantidade_total_refugo     = ConferenciaUsinagemDetalhamento::where('conferencia_usinagem_id', '=', $param['principal_id'])->sum('quantidade_refugo');
+
+                TTransaction::close();
+                if ((int)$quantidade_total_retrabalho > 0)
+                {
+                    $obj->quantidade_total_retrabalho = $quantidade_total_retrabalho;
+                    $obj->margem_total_retrabalho = FuncoesCalculos::calcularMargensRetFloat($param['quantidade_total'], $quantidade_total_retrabalho, 2);
+                }
+
+                if ((int)$quantidade_total_refugo > 0)
+                {
+                    $obj->quantidade_total_refugo = $quantidade_total_refugo;
+                    $obj->margem_total_refugo = FuncoesCalculos::calcularMargensRetFloat($param['quantidade_total'], $quantidade_total_refugo, 2);
+                }   
+            }
+
+            $obj->margem_total_reprovado = (float)$quantidade_total_retrabalho + (float)$quantidade_total_refugo;
+            TForm::sendData('form_PrincipalConferenciaUsinagemDetalhamentoForm', $obj);
+        }
+        catch (Exception $e)
+        {
+            new TMessage('error', $e->getMessage());
+        }
+    }
+
+    public function onSavePrincipal($param)
     {
         $this->principal_form->validate();
         $data = $this->principal_form->getData();
-
-        $conferencia_usinagem_salva = ConferenciaUsinagem::where("ordem_servico = ".$data->ordem_servico." and id ",'<>', $data->principal_id)->first();
-        if($conferencia_usinagem_salva)
-            throw new Exception(_('Já existe um registro para essa ordem de serviço, verifique!'));
-
-        if((int)$data->principal_id > 0)
+        try
         {
-            $object = new ConferenciaUsinagem($data->principal_id);
-            $object->alterado_em       = date('Y-m-d');
-            $object->alterou_pessoa_id = TSession::getValue('userid');
+            if ((int)$data->cancelado == 1 && (int)$data->motivo_cancelamento_id == 0)
+                throw new Exception(_t("To cancel, please provide a reason for cancellation."));
 
-            $object->alterou_pessoa_nome = SystemUser::find(TSession::getValue('userid'))->name;
+            TTransaction::open('permission');
+
+            $conferencia_usinagem_salva = ConferenciaUsinagem::where("ordem_servico = ".$data->ordem_servico." and id ",'<>', (int)$data->principal_id)->first();
+            if($conferencia_usinagem_salva)
+                throw new Exception(_('Já existe um registro para essa ordem de serviço, verifique!'));
+
+            if((int)$data->principal_id > 0)
+            {
+                $object                      = new ConferenciaUsinagem($data->principal_id);
+                $object->alterado_em         = date('Y-m-d');
+                $object->alterado_por        = TSession::getValue('userid');
+                $object->principal_alterou_pessoa_nome = SystemUser::find(TSession::getValue('userid'))->name;
+                $object->principal_alterou_pessoa_id = $object->alterado_por;
+                $object->principal_alterado_em = $object->alterado_em;
+            }
+            else
+            {
+                $object = new ConferenciaUsinagem();
+                $object->criado_em         = date('Y-m-d');
+                $object->criado_por        = TSession::getValue('userid');
+                $object->principal_criou_pessoa_nome = SystemUser::find(TSession::getValue('userid'))->name;
+                $object->principal_criou_pessoa_id   = $object->criado_por;
+                $object->principal_criado_em           = $object->criado_em;
+            }
+
+            $object->ordem_servico          = (int)$data->ordem_servico;
+            $object->quantidade_total       = (int)$data->quantidade_total;
+            $object->quantidade_refugo      = (int)$data->quantidade_total_refugo;
+            $object->quantidade_retrabalho  = (int)$data->quantidade_total_retrabalho;
+            $object->cancelado              = (int)$data->cancelado;
+            $object->insumo_id              = (int)$data->insumo_id;
+
+            $object->store();
+
+            TTransaction::close();
+
+            $object->principal_id                = $object->id;
+            
+            $this->onReload($param);
+            $this->principal_form->setData($object);
+            self::onHabilitaDesabilita($param);
+            new TMessage('info', _('Record saved'));
+
         }
-        else
+        catch (Exception $e)
         {
-            $object = new ConferenciaUsinagem();
-            $object->criado_em       = date('Y-m-d');
-            $object->criou_pessoa_id = TSession::getValue('userid');
-            $object->criou_pessoa_nome = SystemUser::find(TSession::getValue('userid'))->name;
+            TTransaction::rollback();
+            $this->principal_form->setData($data);
+            self::onHabilitaDesabilita($param);
+            new TMessage('error', $e->getMessage());
         }
 
-        $object->ordem_servico = $data->ordem_servico;
-//
-//cancelado
-//insumo_id
-//quantidade_total
-//quantidade_total_refugo
-//quantidade_total_retrabalho
-//margem_total_retrabalho
-//margem_total_refugo
-//margem_total_reprovado
-//principal_criou_pessoa_id
-//principal_criou_pessoa_nome
-//principal_alterou_pessoa_id
-//principal_alterou_pessoa_nome
-//principal_criado_em
-//principal_alterado_em
     }
 
     /**
@@ -295,6 +398,13 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
      */
     public static function onEditCurtain($param = null)
     {
+        print_r($param);
+        if((int)$param['principal_id'] == 0)
+        {
+            new TMessage('error', _('Please save the main form before adding details.'));
+            return;
+        }
+
         try
         {
             // create empty page for right panel
@@ -320,6 +430,42 @@ class ConferenciaUsinagemForm extends \Adianti\Control\TPage
         catch (Exception $e)
         {
             new TMessage('error', $e->getMessage());
+        }
+    }
+
+    public function onEdit($param)
+    {
+        
+    }
+
+    public static function onHabilitaDesabilita($param = null)
+    {
+        try {
+            $formName = 'form_PrincipalConferenciaUsinagemDetalhamentoForm';
+
+            $obj = new stdClass();
+
+            if (isset($param['cancelado']) && $param['cancelado'] == 1)
+            {
+                TDBCombo::enableField($formName, 'motivo_cancelamento_id');
+            }
+            else
+            {
+                TDBCombo::disableField($formName, 'motivo_cancelamento_id');
+                $obj->motivo_cancelamento_id = '';
+            }
+
+            TForm::sendData($formName, $obj);
+        } catch (Exception $e) {
+            new TMessage('error', $e->getMessage());
+        }
+    }
+
+    public function onShow($param = null)
+    {
+        if (!$this->loaded)
+        {
+            $this->onReload($param);
         }
     }
 }
