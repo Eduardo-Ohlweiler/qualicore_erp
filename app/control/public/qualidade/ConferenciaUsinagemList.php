@@ -137,7 +137,7 @@ class ConferenciaUsinagemList extends TPage
             }
 
             $dir  = '/var/www/html/qualicore_erp/app/output';
-            $timestamp = date('Ymd_His'); // exemplo: 20251217_211530
+            $timestamp = date('Ymd_His');
             $file = $dir . "/conferencia_usinagem_{$timestamp}.csv";
 
             if (!is_dir($dir) || !is_writable($dir)) {
@@ -317,7 +317,7 @@ class ConferenciaUsinagemList extends TPage
                     $object->margem_refugo = $margem_retrabalho.' %';
                     $object->margem_retrabalho = $margem_refugo.' %';
                     $object->margem_rejeicao = $margem_rejeicao.' %';
-                    $object->data_conferencia = TDate::date2br($object->data_conferencia);
+                    $object->criado_em = TDate::date2br($object->criado_em);
                     $this->datagrid->addItem($object);
                 }
             }
